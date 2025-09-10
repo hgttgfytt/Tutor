@@ -1,6 +1,7 @@
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -403,6 +404,10 @@
     <img src="apps1.png">
   </a>
 
+    <a onclick="Chat()">
+    <img src="chat2.png">
+  </a>
+
 
 </div>
 
@@ -459,9 +464,10 @@
 <div id="updateDiv">
   <button class="close-btn" onclick="document.getElementById('updateDiv').style.display = 'none';">×</button>
   <h1 class="gtext"> Updates</h1>
-  <h1 style="text-align: center;">Version 1.26</h1>
- <h3 style="text-align: center; color:white;">New update: New wallpaper in settings. (in the top left corner btw)</h3>
-  <h3 style="text-align: center; color:white;">I added a Battle Golf,and "A Small World Cup" I also removed emulators, and changed into the apps section.</h3>
+  <h1 style="text-align: center;">Version 1.30</h1>
+ <h3 style="text-align: center; color:white;">New update: New chat has been added</h3>
+  <h3 style="text-align: center; color:white;">You can now chat with each other now by clicking the chat icon in the navbar.</h3>
+
 
   <a style="background-color: white; padding:10px 20px; color:black; border-radius: 10px; text-align: center; font-family: sans-serif; text-decoration: none; " href="https://www.patreon.com/c/T9OS">Support us!</a>
 
@@ -477,6 +483,47 @@
           
 </div>
 
+<div id="ChatDiv">
+  <button class="close-btn" onclick="document.getElementById('ChatDiv').style.display = 'none';">×</button>
+
+
+ 
+<iframe class="frame" src="chat.html"></iframe>
+  <style>
+    .frame{
+      width:100%;
+      height:95%;
+      bottom:0;
+      position: absolute;
+      border:none;
+      border-radius:0px 0px 20px 20px;
+      left:0;
+    }
+     #ChatDiv {
+    display: none;
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #141414;
+    color: white;
+    inset: 0;
+    margin:auto;
+    position: fixed;
+    z-index: 1000;
+    border-radius:20px; 
+    opacity:85%; 
+    width:85%;
+    height: 73%; 
+    overflow-x: hidden;
+    overflow-y: auto;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+
+      animation: popIn 0.5s ease-out forwards;
+
+  }
+  </style>
+ 
+           
+</div>
 
 <div id="soundDiv">
   <button class="close-btn" onclick="document.getElementById('soundDiv').style.display = 'none';">×</button>
@@ -512,7 +559,12 @@
      
         
        
-
+<script>
+  function Chat(){
+    const div = document.getElementById('ChatDiv');
+    div.style.display = div.style.display === 'block' ? 'none' : 'block';
+  }
+</script>
           
 </div>
 
