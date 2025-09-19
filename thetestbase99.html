@@ -777,6 +777,9 @@ backdrop-filter: blur(7px);
   <button class="close-btn" onclick="document.getElementById('hiddenDiv').style.display = 'none';">●</button>
   <button class="back" style="top:10px; left: 50px; position: fixed; color:white;"    onclick="document.getElementById('frame2').src = 'test99.html';">←</button>
 <h3 style="  left: 50%; color:white; top:-5px; position: absolute;   transform: translateX(-50%);      " >Games</h3>
+<h3  id="fpsCounter" style="  left: 50%; color:white; top:-5px; position: absolute;   transform: translateX(-50%);      " ></h3>
+ 
+
 
 
 <iframe id="frame2" src="test99.html"></iframe>
@@ -825,6 +828,27 @@ backdrop-filter: blur(7px);
 
   }
   </style>
+
+  <script>
+let lastTime = performance.now();
+let frameCount = 0;
+let fps = 0;
+
+function trackFPS() {
+  frameCount++;
+  const now = performance.now();
+  const delta = now - lastTime;
+  if (delta >= 1000) { 
+    fps = Math.round((frameCount * 1000) / delta);
+    document.getElementById('fpsCounter').innerText = 'FPS: ' + fps;
+    frameCount = 0;
+    lastTime = now;
+  }
+  requestAnimationFrame(trackFPS);
+}
+
+requestAnimationFrame(trackFPS);
+</script>
  
            
 </div>
