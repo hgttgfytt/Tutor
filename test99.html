@@ -413,3 +413,19 @@ border-radius: 20px;
                   
      }
 </style>
+
+<script>
+  document.getElementById('searchBar').addEventListener('input', function () {
+    const searchTerm = this.value.toLowerCase();
+    const images = document.querySelectorAll('#imageContainer img');
+
+    images.forEach(image => {
+      const altText = image.getAttribute('alt') || '';
+      if (altText.toLowerCase().includes(searchTerm)) {
+        image.style.display = 'inline-block';
+      } else {
+        image.style.display = 'none';
+      }
+    });
+  });
+</script>
