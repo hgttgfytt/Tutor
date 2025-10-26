@@ -724,7 +724,7 @@ backdrop-filter: blur(7px);
 
 
  
-<iframe class="frame3" onclick="terminal"></iframe>
+<iframe class="frame3" src="terminal.html"></iframe>
   <style>
     .frame3{
       width:100%;
@@ -840,13 +840,20 @@ backdrop-filter: blur(7px);
     <a onclick="terminal()"><img class="t9btn" src="terminal.png"></a>
   </div>
 <script>
-  script>
-  function terminal(){
+  function terminal() {
     const div = document.getElementById('terminalDiv');
-    div.style.display = div.style.display === 'block' ? 'none' : 'block';
+    if (div.style.display === 'block') {
+      div.style.display = 'none';
+    } else {
+      div.style.display = 'block';
+    }
     document.getElementById('t9Div').style.display = 'none';
   }
 </script>
+
+
+
+
 </script>
 </script>
   <style>
