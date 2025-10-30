@@ -1225,6 +1225,14 @@ requestAnimationFrame(trackFPS);
       <option value="pbWaves.jpg">Purple Blue Abstract</option>
 
 </select>
+ <select id="preset">
+    <option value="default">Default (T9 OS)</option>
+    <option value="google">Google</option>
+    <option value="classroom">Google Classroom</option>
+    <option value="vocab">Vocabulary.com</option>
+  </select>
+
+  
 <a   onclick="openGame()"  class="round-btn">Hide url</a>
 <a  id="toggleBTN" class="round-btn">Toggle logo</a>
 
@@ -1248,6 +1256,23 @@ requestAnimationFrame(trackFPS);
   
 </div>
   
+
+<script>
+    const presetSelect = document.getElementById("preset");
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const saved = localStorage.getItem("cloak_preset") || "default";
+      presetSelect.value = saved;
+    });
+
+    presetSelect.addEventListener("change", () => {
+      localStorage.setItem("cloak_preset", presetSelect.value);
+      console.log("✅ Preset saved:", presetSelect.value);
+    });
+  </script>
+
+
+
 <script>
   function updateTime() {
   var date = new Date();
