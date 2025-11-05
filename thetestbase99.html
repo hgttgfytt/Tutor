@@ -103,27 +103,7 @@ color: white;
 .navbar img{
   opacity:1;
 }
-.navbar.vertical {
- position: fixed;
-    bottom: 10px;
-    left: 0;
-    width: 19%;
-    background-color: #161616;
-    border-radius: 20px 20px 20px 20px;
-    gap: 5px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 45px;
-    opacity:65%;
-    left: 50%;
-    transform: translateX(-50%); 
-    box-shadow: 0px 4px 12px #000000;
-    outline: #f9f9f9;
-    outline-width: 3px;
-    border: 1.5px solid #000000;
 
-}
 
 
 
@@ -1284,7 +1264,6 @@ requestAnimationFrame(trackFPS);
     <option value="classroom">Google Classroom</option>
     <option value="vocab">Vocabulary.com</option>
   </select>
-<a  onclick="toggleNavbar()" class="round-btn">Toggle Navbar</a>
 
 <style>
    .round-btn {
@@ -1306,23 +1285,6 @@ requestAnimationFrame(trackFPS);
   
 </div>
   
-<script>
-const navbar = document.getElementById('navbar');
-
-function toggleNavbar() {
-  const isVertical = navbar.classList.toggle('vertical');
-  localStorage.setItem('navbarOrientation', isVertical ? 'vertical' : 'horizontal');
-}
-
-window.addEventListener('load', () => {
-  const saved = localStorage.getItem('navbarOrientation');
-  if (saved === 'vertical') {
-    navbar.classList.add('vertical');
-  } else {
-    navbar.classList.remove('vertical'); 
-  }
-});
-</script>
 
 
 
