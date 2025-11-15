@@ -1855,17 +1855,20 @@ if (selectedBackground) {
 const box = document.getElementById('settingsDiv');
 const DRAG_HEIGHT = 50; // top 50px is draggable
 
-box.addEventListener('pointerdown', e => {
-    e.preventDefault();
+let isDragging = false;
+let offsetX = 0;
+let offsetY = 0;
 
+box.addEventListener('pointerdown', e => {
     const rect = box.getBoundingClientRect();
     const offsetYInDiv = e.clientY - rect.top;
 
     // Only start drag if pointer is within top DRAG_HEIGHT
     if (offsetYInDiv > DRAG_HEIGHT) return;
 
-    const offsetX = e.clientX - rect.left;
-    const offsetY = offsetYInDiv;
+    isDragging = true;
+    offsetX = e.clientX - rect.left;
+    offsetY = offsetYInDiv;
 
     // Convert centered div to draggable left/top
     box.style.inset = 'auto';
@@ -1873,33 +1876,29 @@ box.addEventListener('pointerdown', e => {
     box.style.left = rect.left + 'px';
     box.style.top = rect.top + 'px';
 
-    // Lock pointer so dragging continues outside the div
-    box.setPointerCapture(e.pointerId);
     box.style.cursor = 'grabbing';
-
-    function handleMove(e) {
-        let newX = e.clientX - offsetX;
-        let newY = e.clientY - offsetY;
-
-        newX = Math.max(0, Math.min(newX, window.innerWidth - box.offsetWidth));
-        newY = Math.max(0, Math.min(newY, window.innerHeight - box.offsetHeight));
-
-        box.style.left = newX + 'px';
-        box.style.top = newY + 'px';
-    }
-
-    function handleUp(e) {
-        box.releasePointerCapture(e.pointerId);
-        box.style.cursor = 'grab';
-
-        document.removeEventListener('pointermove', handleMove);
-        document.removeEventListener('pointerup', handleUp);
-    }
-
-    // Attach move/up to document so buttons inside div remain clickable
-    document.addEventListener('pointermove', handleMove);
-    document.addEventListener('pointerup', handleUp);
 });
+
+document.addEventListener('pointermove', e => {
+    if (!isDragging) return;
+
+    let newX = e.clientX - offsetX;
+    let newY = e.clientY - offsetY;
+
+    // Keep inside viewport
+    newX = Math.max(0, Math.min(newX, window.innerWidth - box.offsetWidth));
+    newY = Math.max(0, Math.min(newY, window.innerHeight - box.offsetHeight));
+
+    box.style.left = newX + 'px';
+    box.style.top = newY + 'px';
+});
+
+document.addEventListener('pointerup', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    box.style.cursor = 'grab';
+});
+
 
 
 
