@@ -1853,7 +1853,7 @@ if (selectedBackground) {
 
 
 <script>
-const DRAG_HEIGHT = 20; // bottom area draggable height
+const DRAG_MARGIN = 20; // size of bottom corners draggable area
 const RESIZE_MARGIN = 10;
 
 const divs = [
@@ -1872,7 +1872,6 @@ divs.forEach(box => {
     let offsetX = 0;
     let offsetY = 0;
 
-    // Store initial size/position when resizing
     let startWidth = 0;
     let startHeight = 0;
     let startLeft = 0;
@@ -1892,20 +1891,30 @@ divs.forEach(box => {
         return dir;
     }
 
+    function isInBottomCorners(e) {
+        const rect = box.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+
+        // bottom-left corner
+        const inBottomLeft = x <= DRAG_MARGIN && y >= rect.height - DRAG_MARGIN;
+        // bottom-right corner
+        const inBottomRight = x >= rect.width - DRAG_MARGIN && y >= rect.height - DRAG_MARGIN;
+
+        return inBottomLeft || inBottomRight;
+    }
+
     box.addEventListener('pointermove', e => {
         if (isDragging || isResizing) return;
-        const rect = box.getBoundingClientRect();
-        const offsetYInDiv = e.clientY - rect.top;
         const dir = getResizeDirection(e);
 
         if (dir) box.style.cursor = dir + '-resize';
-        else if (offsetYInDiv >= rect.height - DRAG_HEIGHT) box.style.cursor = 'grab'; // bottom draggable
+        else if (isInBottomCorners(e)) box.style.cursor = 'grab';
         else box.style.cursor = 'default';
     });
 
     box.addEventListener('pointerdown', e => {
         const rect = box.getBoundingClientRect();
-        const offsetYInDiv = e.clientY - rect.top;
         const dir = getResizeDirection(e);
 
         document.body.style.userSelect = 'none';
@@ -1915,7 +1924,7 @@ divs.forEach(box => {
         box.style.top = rect.top + 'px';
 
         if (dir) {
-            // Start resizing
+            // Resize
             isResizing = true;
             resizeDir = dir;
 
@@ -1928,18 +1937,17 @@ divs.forEach(box => {
 
             box.style.width = startWidth + 'px';
             box.style.height = startHeight + 'px';
-        } else if (offsetYInDiv >= rect.height - DRAG_HEIGHT) {
-            // Start dragging from bottom
+        } else if (isInBottomCorners(e)) {
+            // Drag from bottom corners
             isDragging = true;
             offsetX = e.clientX - rect.left;
-            offsetY = offsetYInDiv;
+            offsetY = e.clientY - rect.top;
         } else return;
 
         box.style.cursor = isDragging ? 'grabbing' : dir + '-resize';
     });
 
     document.addEventListener('pointermove', e => {
-        // Drag
         if (isDragging) {
             let newX = e.clientX - offsetX;
             let newY = e.clientY - offsetY;
@@ -1949,7 +1957,6 @@ divs.forEach(box => {
             box.style.top = newY + 'px';
         }
 
-        // Resize
         if (isResizing) {
             let deltaX = e.clientX - startMouseX;
             let deltaY = e.clientY - startMouseY;
@@ -1987,6 +1994,7 @@ divs.forEach(box => {
     });
 });
 </script>
+
 
 
 
