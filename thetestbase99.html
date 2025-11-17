@@ -1853,144 +1853,136 @@ if (selectedBackground) {
 
 
 <script>
-const DRAG_HEIGHT = 50; // Top draggable area
-const RESIZE_MARGIN = 20; // Bottom corner draggable/resizable
+const DRAG_HEIGHT = 50; // Top draggable
+const RESIZE_MARGIN = 20; // Bottom corner draggable
 
 const divs = [
-    document.getElementById('settingsDiv'),
-    document.getElementById('aiDiv'),
-    document.getElementById('hiddenDiv'),
-    document.getElementById('updateDiv'),
-    document.getElementById('searchDiv'),
-    document.getElementById('ChatDiv')
+  document.getElementById('settingsDiv'),
+  document.getElementById('aiDiv'),
+  document.getElementById('hiddenDiv'),
+  document.getElementById('updateDiv'),
+  document.getElementById('searchDiv'),
+  document.getElementById('ChatDiv')
 ];
 
 divs.forEach(box => {
-    let isDragging = false;
-    let isResizing = false;
-    let resizingCorner = ''; // 'bl' or 'br'
-    let offsetX = 0;
-    let offsetY = 0;
+  let isDragging = false;
+  let isResizing = false;
+  let resizingCorner = ''; // 'bl' or 'br'
+  let offsetX = 0;
+  let offsetY = 0;
 
-    let startWidth = 0;
-    let startHeight = 0;
-    let startLeft = 0;
-    let startTop = 0;
-    let startMouseX = 0;
-    let startMouseY = 0;
+  let startWidth = 0;
+  let startHeight = 0;
+  let startLeft = 0;
+  let startTop = 0;
+  let startMouseX = 0;
+  let startMouseY = 0;
 
-    function checkBottomCorner(e) {
-        const rect = box.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+  function checkBottomCorner(e) {
+    const rect = box.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
 
-        if (y >= rect.height - RESIZE_MARGIN) {
-            if (x <= RESIZE_MARGIN) return 'bl';
-            else if (x >= rect.width - RESIZE_MARGIN) return 'br';
-        }
-        return '';
+    if (y >= rect.height - RESIZE_MARGIN) {
+      if (x <= RESIZE_MARGIN) return 'bl';
+      else if (x >= rect.width - RESIZE_MARGIN) return 'br';
+    }
+    return '';
+  }
+
+  box.addEventListener('pointermove', e => {
+    if (isDragging || isResizing) return;
+    const rect = box.getBoundingClientRect();
+    const offsetYInDiv = e.clientY - rect.top;
+    const corner = checkBottomCorner(e);
+
+    if (offsetYInDiv <= DRAG_HEIGHT) box.style.cursor = 'grab';
+    else if (corner) box.style.cursor = 'nwse-resize';
+    else box.style.cursor = 'default';
+  });
+
+  box.addEventListener('pointerdown', e => {
+    const rect = box.getBoundingClientRect();
+    const offsetYInDiv = e.clientY - rect.top;
+    const corner = checkBottomCorner(e);
+
+    document.body.style.userSelect = 'none';
+    box.style.inset = 'auto';
+    box.style.margin = '0';
+    box.style.left = rect.left + 'px';
+    box.style.top = rect.top + 'px';
+    box.style.width = rect.width + 'px';
+    box.style.height = rect.height + 'px';
+
+    // Drag top
+    if (offsetYInDiv <= DRAG_HEIGHT) {
+      isDragging = true;
+      offsetX = e.clientX - rect.left;
+      offsetY = offsetYInDiv;
+      box.style.cursor = 'grabbing';
+    }
+    // Resize bottom corners
+    else if (corner) {
+      isResizing = true;
+      resizingCorner = corner;
+
+      startWidth = rect.width;
+      startHeight = rect.height;
+      startLeft = rect.left;
+      startTop = rect.top;
+      startMouseX = e.clientX;
+      startMouseY = e.clientY;
+
+      box.style.cursor = 'nwse-resize';
+    }
+  });
+
+  document.addEventListener('pointermove', e => {
+    if (isDragging) {
+      let newX = e.clientX - offsetX;
+      let newY = e.clientY - offsetY;
+      newX = Math.max(0, Math.min(newX, window.innerWidth - box.offsetWidth));
+      newY = Math.max(0, Math.min(newY, window.innerHeight - box.offsetHeight));
+      box.style.left = newX + 'px';
+      box.style.top = newY + 'px';
     }
 
-    function disableIframes() {
-        document.querySelectorAll('iframe').forEach(f => f.style.pointerEvents = 'none');
+    if (isResizing) {
+      const deltaX = e.clientX - startMouseX;
+      const deltaY = e.clientY - startMouseY;
+
+      let newWidth = startWidth;
+      let newHeight = startHeight;
+      let newLeft = startLeft;
+
+      if (resizingCorner === 'br') {
+        newWidth = startWidth + deltaX;
+        newHeight = startHeight + deltaY;
+      } else if (resizingCorner === 'bl') {
+        newWidth = startWidth - deltaX;
+        newHeight = startHeight + deltaY;
+        newLeft = startLeft + deltaX;
+      }
+
+      newWidth = Math.max(50, newWidth);
+      newHeight = Math.max(50, newHeight);
+
+      box.style.width = newWidth + 'px';
+      box.style.height = newHeight + 'px';
+      box.style.left = newLeft + 'px';
     }
+  });
 
-    function enableIframes() {
-        document.querySelectorAll('iframe').forEach(f => f.style.pointerEvents = '');
-    }
-
-    box.addEventListener('pointermove', e => {
-        if (isDragging || isResizing) return;
-        const rect = box.getBoundingClientRect();
-        const offsetYInDiv = e.clientY - rect.top;
-        const corner = checkBottomCorner(e);
-
-        if (offsetYInDiv <= DRAG_HEIGHT) box.style.cursor = 'grab';
-        else if (corner) box.style.cursor = 'nwse-resize';
-        else box.style.cursor = 'default';
-    });
-
-    box.addEventListener('pointerdown', e => {
-        const rect = box.getBoundingClientRect();
-        const offsetYInDiv = e.clientY - rect.top;
-        const corner = checkBottomCorner(e);
-
-        document.body.style.userSelect = 'none';
-        box.style.inset = 'auto';
-        box.style.margin = '0';
-        box.style.left = rect.left + 'px';
-        box.style.top = rect.top + 'px';
-        box.style.width = rect.width + 'px';
-        box.style.height = rect.height + 'px';
-
-        // Drag from top
-        if (offsetYInDiv <= DRAG_HEIGHT) {
-            isDragging = true;
-            offsetX = e.clientX - rect.left;
-            offsetY = offsetYInDiv;
-            box.style.cursor = 'grabbing';
-            disableIframes(); // prevent iframe interference
-        }
-        // Resize from bottom corners
-        else if (corner) {
-            isResizing = true;
-            resizingCorner = corner;
-            startWidth = rect.width;
-            startHeight = rect.height;
-            startLeft = rect.left;
-            startTop = rect.top;
-            startMouseX = e.clientX;
-            startMouseY = e.clientY;
-            box.style.cursor = 'nwse-resize';
-            disableIframes();
-        }
-    });
-
-    document.addEventListener('pointermove', e => {
-        if (isDragging) {
-            let newX = e.clientX - offsetX;
-            let newY = e.clientY - offsetY;
-            newX = Math.max(0, Math.min(newX, window.innerWidth - box.offsetWidth));
-            newY = Math.max(0, Math.min(newY, window.innerHeight - box.offsetHeight));
-            box.style.left = newX + 'px';
-            box.style.top = newY + 'px';
-        }
-
-        if (isResizing) {
-            const rect = box.getBoundingClientRect();
-            const mouseX = e.clientX;
-            const mouseY = e.clientY;
-
-            let newWidth, newHeight, newLeft;
-
-            if (resizingCorner === 'br') {
-                newWidth = mouseX - rect.left;
-                newHeight = mouseY - rect.top;
-                newLeft = rect.left;
-            } else if (resizingCorner === 'bl') {
-                newWidth = rect.right - mouseX;
-                newHeight = mouseY - rect.top;
-                newLeft = mouseX;
-            }
-
-            newWidth = Math.max(50, newWidth);
-            newHeight = Math.max(50, newHeight);
-
-            box.style.width = newWidth + 'px';
-            box.style.height = newHeight + 'px';
-            box.style.left = newLeft + 'px';
-        }
-    });
-
-    document.addEventListener('pointerup', () => {
-        isDragging = false;
-        isResizing = false;
-        resizingCorner = '';
-        document.body.style.userSelect = '';
-        enableIframes();
-    });
+  document.addEventListener('pointerup', () => {
+    isDragging = false;
+    isResizing = false;
+    resizingCorner = '';
+    document.body.style.userSelect = '';
+  });
 });
 </script>
+
 
 
 
