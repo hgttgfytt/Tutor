@@ -1854,7 +1854,7 @@ if (selectedBackground) {
 
 <script>
 const DRAG_HEIGHT = 50; // Top draggable
-const RESIZE_MARGIN = 20; // Bottom corner draggable
+const RESIZE_MARGIN = 20; // Bottom corner
 
 const divs = [
   document.getElementById('settingsDiv'),
@@ -1869,21 +1869,13 @@ divs.forEach(box => {
   let isDragging = false;
   let isResizing = false;
   let resizingCorner = ''; // 'bl' or 'br'
-  let offsetX = 0;
-  let offsetY = 0;
-
-  let startWidth = 0;
-  let startHeight = 0;
-  let startLeft = 0;
-  let startTop = 0;
-  let startMouseX = 0;
-  let startMouseY = 0;
+  let startLeft = 0, startTop = 0, startWidth = 0, startHeight = 0;
+  let pointerDownX = 0, pointerDownY = 0;
 
   function checkBottomCorner(e) {
     const rect = box.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-
     if (y >= rect.height - RESIZE_MARGIN) {
       if (x <= RESIZE_MARGIN) return 'bl';
       else if (x >= rect.width - RESIZE_MARGIN) return 'br';
@@ -1918,8 +1910,6 @@ divs.forEach(box => {
     // Drag top
     if (offsetYInDiv <= DRAG_HEIGHT) {
       isDragging = true;
-      offsetX = e.clientX - rect.left;
-      offsetY = offsetYInDiv;
       box.style.cursor = 'grabbing';
     }
     // Resize bottom corners
@@ -1927,12 +1917,13 @@ divs.forEach(box => {
       isResizing = true;
       resizingCorner = corner;
 
-      startWidth = rect.width;
-      startHeight = rect.height;
       startLeft = rect.left;
       startTop = rect.top;
-      startMouseX = e.clientX;
-      startMouseY = e.clientY;
+      startWidth = rect.width;
+      startHeight = rect.height;
+
+      pointerDownX = e.clientX;
+      pointerDownY = e.clientY;
 
       box.style.cursor = 'nwse-resize';
     }
@@ -1940,8 +1931,8 @@ divs.forEach(box => {
 
   document.addEventListener('pointermove', e => {
     if (isDragging) {
-      let newX = e.clientX - offsetX;
-      let newY = e.clientY - offsetY;
+      let newX = e.clientX - box.offsetWidth / 2;
+      let newY = e.clientY - DRAG_HEIGHT / 2;
       newX = Math.max(0, Math.min(newX, window.innerWidth - box.offsetWidth));
       newY = Math.max(0, Math.min(newY, window.innerHeight - box.offsetHeight));
       box.style.left = newX + 'px';
@@ -1949,24 +1940,18 @@ divs.forEach(box => {
     }
 
     if (isResizing) {
-      const deltaX = e.clientX - startMouseX;
-      const deltaY = e.clientY - startMouseY;
-
       let newWidth = startWidth;
       let newHeight = startHeight;
       let newLeft = startLeft;
 
       if (resizingCorner === 'br') {
-        newWidth = startWidth + deltaX;
-        newHeight = startHeight + deltaY;
+        newWidth = Math.max(50, startWidth + (e.clientX - pointerDownX));
+        newHeight = Math.max(50, startHeight + (e.clientY - pointerDownY));
       } else if (resizingCorner === 'bl') {
-        newWidth = startWidth - deltaX;
-        newHeight = startHeight + deltaY;
-        newLeft = startLeft + deltaX;
+        newWidth = Math.max(50, startWidth - (e.clientX - pointerDownX));
+        newHeight = Math.max(50, startHeight + (e.clientY - pointerDownY));
+        newLeft = startLeft + (startWidth - newWidth);
       }
-
-      newWidth = Math.max(50, newWidth);
-      newHeight = Math.max(50, newHeight);
 
       box.style.width = newWidth + 'px';
       box.style.height = newHeight + 'px';
@@ -1982,6 +1967,7 @@ divs.forEach(box => {
   });
 });
 </script>
+
 
 
 
