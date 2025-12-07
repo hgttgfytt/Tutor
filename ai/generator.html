@@ -181,6 +181,33 @@ html,body{
 </style>
 </head>
 <body>
+  <button id="backBtn">⬅ Back</button>
+
+<style>
+#backBtn {
+  background: #111; /* Black background */
+  border: none;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+#backBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.7);
+}
+
+#backBtn:active {
+  transform: translateY(0px);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.4);
+}
+</style>
+
 
 <div class="container">
   <div class="title">T9 AI Image Generator</div>
