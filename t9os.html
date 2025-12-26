@@ -1919,18 +1919,18 @@ if (selectedBackground) {
 <p style="color:#acacac; position: fixed; bottom: -3px; left: 100px; opacity: 0.6;" id="myId">ID: <span id="idValue"></span></p>
 
 <script>
-const OWNER_ID = "1766701613"; // your owner ID
+const OWNER_ID = "1766706428600986294"; // your owner ID
 const ID_KEY = "numericUserID";
 const BAN_LIST_KEY = "bannedIDs";
 
 // Generate a numeric ID (~10 digits)
 function generateNumericID() {
-  const timestamp = Date.now().toString().slice(-6); // last 6 digits
-  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0'); // 4 digits
+  const timestamp = Date.now().toString().slice(-6); // last 6 digits of timestamp
+  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0'); // 4 random digits
   return random + timestamp;
 }
 
-// Ensure the script runs after the DOM is ready
+// Wait until DOM is loaded
 document.addEventListener("DOMContentLoaded", () => {
   // Get or create user ID
   let myID = localStorage.getItem(ID_KEY);
@@ -1939,7 +1939,7 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem(ID_KEY, myID);
   }
 
-  // Display ID in the span
+  // Show ID in the span
   const idSpan = document.getElementById("idValue");
   if (idSpan) idSpan.textContent = myID;
 
@@ -1994,6 +1994,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
 
 </script>
 
