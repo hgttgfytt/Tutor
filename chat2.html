@@ -76,7 +76,7 @@
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
-import { getDatabase, ref, push, onChildAdded, off, get, child } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
+import { getDatabase, ref, push, onChildAdded, off } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD74Fi2RKsvv1sXTAEIiTYrRKCv22MRhh8",
@@ -143,15 +143,20 @@ function loadMessages(room){
   });
 }
 
+// FIXED: Own messages appear immediately
 function sendMessage(){
   const txt = msgInput.value.trim();
   if(!txt) return;
-  push(ref(db, "messages/" + currentRoom), {
+
+  const messagePayload = {
     name: username,
     id: myID,
     text: txt,
     timestamp: Date.now()
-  });
+  };
+
+  appendMessage(messagePayload); // Immediately show your message
+  push(ref(db, "messages/" + currentRoom), messagePayload);
   msgInput.value = '';
 }
 
