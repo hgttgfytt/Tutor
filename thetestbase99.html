@@ -2025,11 +2025,14 @@ dragHandle.addEventListener("mousedown", e => {
   offsetX = e.clientX - rect.left;
   offsetY = e.clientY - rect.top;
   
-  win.style.transform = 'none';
-  win.style.left = rect.left + 'px';
-  win.style.top = rect.top + 'px';
-  win.style.margin = '0';
-  win.style.inset = 'auto';
+  // Only convert if currently centered
+  if (win.style.left === '' || win.style.left === 'auto') {
+    win.style.transform = 'none';
+    win.style.left = rect.left + 'px';
+    win.style.top = rect.top + 'px';
+    win.style.margin = '0';
+    win.style.inset = 'auto';
+  }
   
   e.preventDefault();
   e.stopPropagation();
@@ -2049,7 +2052,7 @@ resizer.addEventListener("mousedown", e => {
   win.style.width = startWidth + 'px';
   win.style.height = startHeight + 'px';
   
-  if (win.style.transform !== 'none') {
+  if (win.style.transform !== 'none' && win.style.transform !== '') {
     win.style.transform = 'none';
     win.style.left = rect.left + 'px';
     win.style.top = rect.top + 'px';
@@ -2069,8 +2072,8 @@ document.addEventListener("mousemove", e => {
     const maxX = window.innerWidth - win.offsetWidth;
     const maxY = window.innerHeight - win.offsetHeight;
 
-    newLeft = Math.min(newLeft, maxX);
-    newTop = Math.min(newTop, maxY);
+    newLeft = Math.max(0, Math.min(newLeft, maxX));
+    newTop = Math.max(0, Math.min(newTop, maxY));
 
     win.style.left = newLeft + "px";
     win.style.top = newTop + "px";
