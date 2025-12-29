@@ -1165,6 +1165,7 @@ transform: translateX(-50%);
 
 
 <iframe id="frame2" src="test99.html"></iframe>
+
   <style>
     #frame2{
       width:100%;
@@ -1211,6 +1212,34 @@ backdrop-filter: blur(7px);
 
   }
   </style>
+
+<style>
+    .resizer {
+      position: absolute;
+      width: 25px;
+      height: 25px;
+      right: 5px;
+      bottom: 5px;
+      cursor: nwse-resize;
+      z-index: 10;
+      border-radius: 0 0 25px 0;
+    }
+
+    .resizer::after {
+      content: '';
+      position: absolute;
+      right: 8px;
+      bottom: 8px;
+      width: 10px;
+      height: 10px;
+      border-right: 2px solid rgba(255,255,255,0.4);
+      border-bottom: 2px solid rgba(255,255,255,0.4);
+    }
+</style>
+
+  <div class="resizer"></div>
+
+
 
   <script>
 let lastTime = performance.now();
@@ -1940,9 +1969,17 @@ let startHeight = 0;
 // DRAGGING - Only from header
 header.addEventListener("mousedown", e => {
   isDragging = true;
-  // Calculate offset from mouse to top-left of window
-  offsetX = e.clientX - win.offsetLeft;
-  offsetY = e.clientY - win.offsetTop;
+  
+  // Get current position (handling both px and transform)
+  const rect = win.getBoundingClientRect();
+  offsetX = e.clientX - rect.left;
+  offsetY = e.clientY - rect.top;
+  
+  // Remove transform centering if it exists
+  win.style.transform = 'none';
+  win.style.left = rect.left + 'px';
+  win.style.top = rect.top + 'px';
+  
   e.preventDefault();
 });
 
@@ -1951,16 +1988,30 @@ resizer.addEventListener("mousedown", e => {
   isResizing = true;
   startX = e.clientX;
   startY = e.clientY;
-  startWidth = win.offsetWidth;
-  startHeight = win.offsetHeight;
+  
+  // Get actual rendered dimensions
+  const rect = win.getBoundingClientRect();
+  startWidth = rect.width;
+  startHeight = rect.height;
+  
+  // Remove percentage-based sizing
+  win.style.width = startWidth + 'px';
+  win.style.height = startHeight + 'px';
+  
+  // Remove transform if present
+  if (win.style.transform !== 'none') {
+    win.style.transform = 'none';
+    win.style.left = rect.left + 'px';
+    win.style.top = rect.top + 'px';
+  }
+  
   e.preventDefault();
-  e.stopPropagation(); // Prevent drag from triggering
+  e.stopPropagation();
 });
 
 // MOUSE MOVE - Handle both dragging and resizing
 document.addEventListener("mousemove", e => {
   if (isDragging) {
-    // Calculate new position based on mouse position minus offset
     let newLeft = e.clientX - offsetX;
     let newTop = e.clientY - offsetY;
 
@@ -1976,19 +2027,20 @@ document.addEventListener("mousemove", e => {
   }
 
   if (isResizing) {
-    // Calculate size change
     const deltaX = e.clientX - startX;
     const deltaY = e.clientY - startY;
 
     let newWidth = startWidth + deltaX;
     let newHeight = startHeight + deltaY;
 
-    // Keep minimum size and within viewport
-    const maxWidth = window.innerWidth - win.offsetLeft;
-    const maxHeight = window.innerHeight - win.offsetTop;
+    // Keep minimum size
+    const currentLeft = parseInt(win.style.left) || 0;
+    const currentTop = parseInt(win.style.top) || 0;
+    const maxWidth = window.innerWidth - currentLeft - 20;
+    const maxHeight = window.innerHeight - currentTop - 20;
 
-    newWidth = Math.max(200, Math.min(newWidth, maxWidth));
-    newHeight = Math.max(150, Math.min(newHeight, maxHeight));
+    newWidth = Math.max(300, Math.min(newWidth, maxWidth));
+    newHeight = Math.max(200, Math.min(newHeight, maxHeight));
 
     win.style.width = newWidth + "px";
     win.style.height = newHeight + "px";
@@ -2003,16 +2055,21 @@ document.addEventListener("mouseup", () => {
 
 // Keep window in viewport on window resize
 window.addEventListener("resize", () => {
-  const maxX = window.innerWidth - win.offsetWidth;
-  const maxY = window.innerHeight - win.offsetHeight;
+  const rect = win.getBoundingClientRect();
+  const maxX = window.innerWidth - rect.width;
+  const maxY = window.innerHeight - rect.height;
 
-  let left = win.offsetLeft;
-  let top = win.offsetTop;
+  let left = rect.left;
+  let top = rect.top;
 
-  if (left > maxX) win.style.left = Math.max(0, maxX) + "px";
-  if (top > maxY) win.style.top = Math.max(0, maxY) + "px";
+  if (left > maxX || top > maxY) {
+    win.style.transform = 'none';
+    win.style.left = Math.max(0, Math.min(left, maxX)) + "px";
+    win.style.top = Math.max(0, Math.min(top, maxY)) + "px";
+  }
 });
 </script>
+
 
 
 <p style="color:#acacac; position: fixed; bottom: -3px; left: 10px; opacity: 0.6;">Version 2.5</p>
