@@ -1974,6 +1974,7 @@ if (!dragHandle) {
   dragHandle.style.height = "40px";
   dragHandle.style.cursor = "move";
   dragHandle.style.zIndex = "5";
+  dragHandle.style.pointerEvents = "auto";
   win.appendChild(dragHandle);
 }
 
@@ -2019,6 +2020,11 @@ function enableIframe() {
 }
 
 dragHandle.addEventListener("mousedown", e => {
+  // Don't drag if clicking on buttons or interactive elements
+  if (e.target.tagName === 'BUTTON' || e.target.closest('button')) {
+    return;
+  }
+  
   const rect = win.getBoundingClientRect();
   
   // Convert positioning BEFORE setting isDragging
