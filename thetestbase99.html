@@ -1969,7 +1969,7 @@ if (!dragHandle) {
   dragHandle.className = "drag-handle";
   dragHandle.style.position = "absolute";
   dragHandle.style.top = "0";
-  dragHandle.style.left = "50px"; // Start after the buttons
+  dragHandle.style.left = "0";
   dragHandle.style.right = "0";
   dragHandle.style.height = "40px";
   dragHandle.style.cursor = "move";
@@ -2003,6 +2003,7 @@ let startY = 0;
 let startWidth = 0;
 let startHeight = 0;
 let hasBeenPositioned = false;
+let hasMoved = false;
 
 // Disable iframe pointer events during drag/resize
 function disableIframe() {
@@ -2020,6 +2021,14 @@ function enableIframe() {
 }
 
 dragHandle.addEventListener("mousedown", e => {
+  // Don't interfere with buttons or elements with onclick
+  if (e.target.tagName === 'BUTTON' || 
+      e.target.closest('button') || 
+      e.target.hasAttribute('onclick') ||
+      e.target.closest('[onclick]')) {
+    return;
+  }
+  
   const rect = win.getBoundingClientRect();
   
   // Convert positioning BEFORE setting isDragging
@@ -2033,6 +2042,7 @@ dragHandle.addEventListener("mousedown", e => {
   }
   
   isDragging = true;
+  hasMoved = false;
   disableIframe();
   
   offsetX = e.clientX - rect.left;
@@ -2072,6 +2082,7 @@ resizer.addEventListener("mousedown", e => {
 
 document.addEventListener("mousemove", e => {
   if (isDragging) {
+    hasMoved = true;
     let newLeft = e.clientX - offsetX;
     let newTop = e.clientY - offsetY;
 
@@ -2111,6 +2122,7 @@ document.addEventListener("mouseup", () => {
   }
   isDragging = false;
   isResizing = false;
+  hasMoved = false;
 });
 
 document.addEventListener("mouseleave", () => {
@@ -2119,6 +2131,7 @@ document.addEventListener("mouseleave", () => {
   }
   isDragging = false;
   isResizing = false;
+  hasMoved = false;
 });
 
 window.addEventListener("resize", () => {
@@ -2136,7 +2149,7 @@ window.addEventListener("resize", () => {
   }
 });
 </script>
-<!--Test2-->
+<!--Test3-->
 
 
 
