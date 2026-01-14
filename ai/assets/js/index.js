@@ -39,7 +39,7 @@ const sendMsg=document.getElementById("sendMsg")
 const modelSelector=document.getElementById("modelSelector")
 const modelSelected=modelSelector.querySelector(".selector-selected")
 const modelOptions=modelSelector.querySelector(".selector-options")
-let modelSourceValue=localStorage.getItem("selectedModel")||"llama-3.1-8b-instant"
+let modelSourceValue = localStorage.getItem("selectedModel") || "llama-3.3-70b-versatile"
 const modelDisplayNames={
   "llama-3.1-8b-instant":"Llama 3.1 8B Instant",
   "llama-3.3-70b-versatile":"Llama 3.3 70B Versatile",
