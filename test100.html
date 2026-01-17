@@ -122,14 +122,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const aiInput = document.getElementById("aiInput");
   const sendMsg = document.getElementById("sendMsg");
 
-  // Conversation memory
-  let conversation = JSON.parse(localStorage.getItem("t9_memory")) || [
+  // ❌ No memory saved, chat resets every page load
+  let conversation = [
     { role: "system", content: "You are T9 AI, a helpful assistant. Remember context and be concise." }
   ];
-
-  function saveMemory(){
-    localStorage.setItem("t9_memory", JSON.stringify(conversation));
-  }
 
   function add(msg, cls){
     const d = document.createElement("div");
@@ -139,15 +135,8 @@ document.addEventListener("DOMContentLoaded", () => {
     chatBody.scrollTop = chatBody.scrollHeight;
   }
 
-  // restore chat
-  conversation.forEach(m => {
-    if(m.role==="user") add(m.content,"user-message");
-    if(m.role==="assistant") add(m.content,"ai-message");
-  });
-
-  if(conversation.length === 1){
-    add("Welcome to T9 AI 🌌","ai-message");
-  }
+  // Always show welcome message
+  add("Welcome to T9 AI 🌌","ai-message");
 
   async function send(){
     const q = aiInput.value.trim();
@@ -155,7 +144,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     add(q,"user-message");
     aiInput.value = "";
-
     conversation.push({ role:"user", content:q });
 
     const thinking = document.createElement("div");
@@ -163,7 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
     thinking.textContent = "Thinking...";
     chatBody.appendChild(thinking);
 
-    // trim memory to prevent lag
+    // Trim memory to prevent lag
     if(conversation.length > 25){
       conversation = [conversation[0], ...conversation.slice(-24)];
     }
@@ -190,7 +178,6 @@ document.addEventListener("DOMContentLoaded", () => {
       thinking.remove();
 
       conversation.push({ role:"assistant", content: reply });
-      saveMemory();
       add(reply,"ai-message");
 
     }catch(err){
