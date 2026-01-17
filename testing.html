@@ -2418,194 +2418,83 @@ wins.forEach(win => {
 
 
 <script>
-  /* ===============================
+/* ===============================
    T9 OS – Optimized Iframe Manager
-   Lazy loads and destroys iframes to reduce lag
+   Simple pause/resume without breaking anything
    =============================== */
 
-const IFRAME_CONFIGS = {
-  hiddenDiv: {
-    src: 'test200.html',
-    className: 'frame',
-    id: 'frame2',
-    styles: {
-      width: '100%',
-      height: '95%',
-      bottom: '0',
-      position: 'absolute',
-      border: 'none',
-      borderRadius: '0px 0px 15px 15px',
-      left: '0',
-      borderTop: '1px solid rgb(37, 37, 37)'
-    }
-  },
-  aiDiv: {
-    src: 'test100.html',
-    className: 'frame',
-    id: 'frame5',
-    styles: {
-      width: '100%',
-      height: '95%',
-      bottom: '0',
-      position: 'absolute',
-      border: 'none',
-      borderRadius: '0px 0px 15px 15px',
-      left: '0',
-      borderTop: '1px solid rgb(37, 37, 37)'
-    }
-  },
-  movieDiv: {
-    src: 'movie.html',
-    className: 'mframe',
-    id: 'mframe',
-    styles: {
-      width: '100%',
-      height: '95%',
-      bottom: '10px',
-      position: 'absolute',
-      border: 'none',
-      borderRadius: '0px 0px 15px 15px',
-      left: '0',
-      borderTop: '1px solid rgb(37, 37, 37)'
-    }
-  },
-  musicDiv: {
-    src: 'music3.html',
-    className: 'frame',
-    id: 'frameMusic',
-    styles: {
-      width: '100%',
-      height: '95%',
-      bottom: '0',
-      position: 'absolute',
-      border: 'none',
-      borderRadius: '0px 0px 15px 15px',
-      left: '0',
-      borderTop: '1px solid rgb(37, 37, 37)'
-    }
-  },
-  terminalDiv: {
-    src: 'terminal.html',
-    className: 'frame3',
-    id: 'frame3',
-    styles: {
-      width: '100%',
-      height: '95%',
-      bottom: '10px',
-      position: 'absolute',
-      border: 'none',
-      borderRadius: '0px 0px 20px 20px',
-      left: '0',
-      bottom: '0'
-    }
-  },
-  searchDiv: {
-    src: 'https://862c58-8080.csb.app',
-    className: 'frame',
-    id: 'frame3',
-    styles: {
-      width: '100%',
-      height: '95.6%',
-      bottom: '0',
-      position: 'absolute',
-      border: 'none',
-      borderRadius: '0px 0px 15px 15px',
-      left: '0'
-    }
-  },
-  ChatDiv: {
-    src: 'chat4.html',
-    className: 'frame',
-    id: 'chatFrame',
-    styles: {
-      width: '100%',
-      height: '95%',
-      bottom: '0',
-      position: 'absolute',
-      border: 'none',
-      borderRadius: '0px 0px 20px 20px',
-      left: '0'
-    }
-  }
-};
-
-// Store original iframe HTML to restore later
-const iframeCache = {};
-
-// Save original iframes on page load
-document.addEventListener('DOMContentLoaded', () => {
-  Object.keys(IFRAME_CONFIGS).forEach(divId => {
-    const div = document.getElementById(divId);
-    const iframe = div?.querySelector('iframe');
-    if (iframe) {
-      iframeCache[divId] = {
-        element: iframe.cloneNode(true),
-        parent: iframe.parentElement
-      };
-    }
-  });
-});
-
-// Create iframe element with config
-function createIframe(divId) {
-  const config = IFRAME_CONFIGS[divId];
-  if (!config) return null;
-
-  const iframe = document.createElement('iframe');
-  iframe.src = config.src;
-  iframe.className = config.className;
-  if (config.id) iframe.id = config.id;
+// Pause iframe by hiding it and blocking interactions
+function pauseIframe(iframe) {
+  if (!iframe) return;
   
-  // Apply styles
-  if (config.styles) {
-    Object.assign(iframe.style, config.styles);
-  }
+  // Block interactions to save CPU
+  iframe.style.pointerEvents = 'none';
+  iframe.style.visibility = 'hidden';
   
-  return iframe;
+  // Send pause message to iframe content (won't break if it fails)
+  try {
+    iframe.contentWindow?.postMessage({ type: 'pause' }, '*');
+  } catch (e) {}
+  
+  // Mark as paused
+  iframe.dataset.paused = 'true';
 }
 
-// Open div and restore/create iframe
-function openDiv(divId) {
-  const div = document.getElementById(divId);
-  if (!div) return;
-
-  // Check if iframe exists
-  let iframe = div.querySelector('iframe');
+// Resume iframe
+function resumeIframe(iframe) {
+  if (!iframe) return;
   
-  // If no iframe, create one
-  if (!iframe && IFRAME_CONFIGS[divId]) {
-    iframe = createIframe(divId);
-    if (iframe) {
-      div.appendChild(iframe);
-    }
+  // Re-enable interactions
+  iframe.style.pointerEvents = 'auto';
+  iframe.style.visibility = 'visible';
+  
+  // Send resume message
+  try {
+    iframe.contentWindow?.postMessage({ type: 'resume' }, '*');
+  } catch (e) {}
+  
+  // Remove paused flag
+  delete iframe.dataset.paused;
+}
+
+// Open div - just show it and resume iframe if exists
+window.openDiv = function(divId) {
+  const div = document.getElementById(divId);
+  if (!div) {
+    console.log('Div not found:', divId);
+    return;
   }
 
   div.style.display = 'block';
+  
+  // Resume iframe if it exists
+  const iframe = div.querySelector('iframe');
+  if (iframe) {
+    resumeIframe(iframe);
+  }
 }
 
-// Close div and destroy iframe to free memory
-function closeDiv(divId) {
+// Close div - hide it and pause iframe
+window.closeDiv = function(divId) {
   const div = document.getElementById(divId);
   if (!div) return;
 
   div.style.display = 'none';
   
-  // Remove iframe after animation completes
-  setTimeout(() => {
-    if (div.style.display === 'none') {
-      const iframe = div.querySelector('iframe');
-      if (iframe) {
-        iframe.src = 'about:blank';
-        iframe.remove();
-      }
-    }
-  }, 300);
+  // Pause iframe if it exists
+  const iframe = div.querySelector('iframe');
+  if (iframe) {
+    pauseIframe(iframe);
+  }
 }
 
 // Toggle div (open/close)
-function toggleDiv(divId) {
+window.toggleDiv = function(divId) {
   const div = document.getElementById(divId);
-  if (!div) return;
+  if (!div) {
+    console.log('Toggle failed - div not found:', divId);
+    return;
+  }
 
   if (div.style.display === 'block') {
     closeDiv(divId);
@@ -2656,13 +2545,18 @@ function fullscreenById(iframeId) {
   }
 }
 
-// Setup close buttons
+// Setup when page loads
 document.addEventListener('DOMContentLoaded', () => {
+  console.log('T9 OS Iframe Manager loaded');
+  
   // Handle all close buttons
   document.querySelectorAll('.close-btn, .close-btn2').forEach(btn => {
     btn.addEventListener('click', (e) => {
       const div = e.target.closest('[id$="Div"]');
-      if (div) closeDiv(div.id);
+      if (div) {
+        console.log('Closing:', div.id);
+        closeDiv(div.id);
+      }
     });
   });
 
@@ -2678,30 +2572,27 @@ document.addEventListener('DOMContentLoaded', () => {
   // Handle toggle div button (games)
   const toggleBtn = document.getElementById('toggleDivButton');
   if (toggleBtn) {
-    toggleBtn.addEventListener('click', () => toggleDiv('hiddenDiv'));
+    toggleBtn.addEventListener('click', () => {
+      console.log('Toggle games clicked');
+      toggleDiv('hiddenDiv');
+    });
   }
 
-  // Close all hidden iframes when page is hidden (save resources)
+  // Pause all iframes when browser tab is hidden
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
-      Object.keys(IFRAME_CONFIGS).forEach(divId => {
-        const div = document.getElementById(divId);
-        if (div && div.style.display !== 'block') {
+      console.log('Tab hidden - pausing all iframes');
+      document.querySelectorAll('iframe').forEach(iframe => pauseIframe(iframe));
+    } else {
+      console.log('Tab visible - resuming visible iframes');
+      // Only resume iframes in visible divs
+      document.querySelectorAll('[id$="Div"]').forEach(div => {
+        if (div.style.display === 'block') {
           const iframe = div.querySelector('iframe');
-          if (iframe) {
-            iframe.src = 'about:blank';
-            iframe.remove();
-          }
+          if (iframe) resumeIframe(iframe);
         }
       });
     }
-  });
-});
-
-// Clean up iframes on page unload
-window.addEventListener('beforeunload', () => {
-  document.querySelectorAll('iframe').forEach(iframe => {
-    iframe.src = 'about:blank';
   });
 });
 </script>
