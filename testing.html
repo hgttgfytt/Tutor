@@ -27,7 +27,6 @@
 @import url('https://fonts.googleapis.com/css?family=Luckiest+Guy');
 
   body {
-  background: linear-gradient(to bottom, #000000, #3a0057, #550075);
   background-repeat: no-repeat;
   background-size: cover;   /* make sure images cover the whole screen */
   margin: 0;
@@ -75,9 +74,9 @@ color: white;
       transform: translateX(-50%);
       height: 56px;
       background: linear-gradient(160deg,
-        rgba(255,255,255,0.08),
-        rgba(0,0,0,0.65)
-      );
+    rgba(40,40,40,0.9),
+    rgba(10,10,10,0.95)
+  );
       border: 1px solid rgba(255,255,255,0.25);
       border-radius: 16px;
       display: flex;
@@ -86,9 +85,9 @@ color: white;
       gap: 12px;
       padding: 0 10px;
       backdrop-filter: blur(4px) saturate(140%);
-      box-shadow:
-        0 20px 40px rgba(0,0,0,.6),
-        inset 0 1px 0 rgba(255,255,255,.2);
+       box-shadow: 
+    0 12px 28px rgba(0,0,0,0.45),
+    0 0 0 1px rgba(255,255,255,0.15) inset;
       transition: height 0.2s ease, border-radius 0.2s ease, border-color 0.2s ease;
       opacity: 0.92;
       z-index: 9999;
@@ -628,26 +627,15 @@ border: 1px solid rgba(255, 255, 255, 0.15);
     justify-content: space-between;
     align-items: center;
 }
- @keyframes popIn {
-      0% {
-        opacity: 0;
-        transform: scale(0.8);
-      }
-      100% {
-        opacity: 80%;
-        transform: scale(1);
-      }
-    }
-     @keyframes popIn2 {
-      0% {
-        opacity: 0;
-        transform: scale(0.8);
-      }
-      100% {
-        opacity: 100%;
-        transform: scale(1);
-      }
-    }
+@keyframes popIn {
+  0% { opacity: 0; transform: scale(0.9); }
+  100% { opacity: 0.9; transform: scale(1); }
+}
+.popIn-class {
+  animation: popIn 0.3s ease-out forwards; /* Reduced from 0.5s */
+}
+
+    
   
 #searchBar{
   text-align:center;
@@ -664,7 +652,28 @@ border: 1px solid rgba(255, 255, 255, 0.15);
 
 }
 
+  /* Chromebook/Mobile optimizations */
+@media (max-width: 1366px), (hover: none) {
+  /* Reduce effects further on lower-end devices */
+  .navbar {
+    backdrop-filter: blur(1px);
+  }
   
+  #appsDiv, #ChatDiv, #hiddenDiv, #aiDiv {
+    backdrop-filter: blur(2px);
+  }
+  
+  /* Simplify animations */
+  * {
+    animation-duration: 0.25s !important;
+    transition-duration: 0.1s !important;
+  }
+  
+  /* Reduce shadow complexity */
+  .navbar, #settingsDiv, #appsDiv {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3) !important;
+  }
+}
 </style>
 </head>
 <body>
