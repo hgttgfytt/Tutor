@@ -681,11 +681,12 @@ border: 1px solid rgba(255, 255, 255, 0.15);
 
 <!-- Navbar -->
 <div id="navbar" class="navbar">
-  <a onclick="t9()">
-    <img src="favicon.png">
-  </a>
+  
   <a id="toggleDivButton">
     <img src="game.png">
+  </a>
+  <a onclick="terminal()">
+    <img src="terminal.png">
   </a>
    <a onclick="ai()">
     <img src="ai.png">
@@ -1106,6 +1107,13 @@ background-color: rgba(5, 139, 196, 0.504);
           
 </div>
 
+<script>
+  function terminal(){
+    const div = document.getElementById('terminalDiv');
+    div.style.display = div.style.display === 'block' ? 'none' : 'block';
+  }
+</script>
+
 <div id="t9Div">
   <button class="close-btn2" onclick="document.getElementById('t9Div').style.display = 'none';">●</button>
       <h4 style="  left: 50%; color:white; top:-9.5px; position: absolute;   transform: translateX(-50%);" >T9 OS</h4>
@@ -1116,17 +1124,7 @@ background-color: rgba(5, 139, 196, 0.504);
   <div class="btn-container">
     <a onclick="terminal()"><img class="t9btn" src="terminal.png"></a>
   </div>
-<script>
-  function terminal() {
-    const div = document.getElementById('terminalDiv');
-    if (div.style.display === 'block') {
-      div.style.display = 'none';
-    } else {
-      div.style.display = 'block';
-    }
-    document.getElementById('t9Div').style.display = 'none';
-  }
-</script>
+
 
 
 
