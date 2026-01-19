@@ -1625,6 +1625,7 @@ backdrop-filter: blur(7px);
   <button class="close-btn" onclick="document.getElementById('settingsDiv').style.display = 'none';">×</button>
 
   <h1 class="seth">|| Settings ||</h1>
+
   
    <label class="label" for="background-select">Select Background:</label>
 <select id="background-select">
@@ -1669,6 +1670,21 @@ backdrop-filter: blur(7px);
   
 <a   onclick="openGame()"  class="round-btn">Hide url</a>
 <a   onclick="toggleNavbar()" class="round-btn">Toggle navbar</a>
+    <input type="color" id="picker" value="#333333">
+        <script>
+        // Directly listening to the picker
+        document.getElementById('picker').addEventListener('input', function() {
+            
+            // The list of divs you want to change
+            const color = this.value;
+
+            document.getElementById('settingsDiv').style.backgroundColor = color;
+            document.getElementById('circle').style.backgroundColor = color;
+            document.getElementById('rect').style.backgroundColor = color;
+            
+        });
+    </script>
+
  <script>
     // Load saved position on page load
     window.addEventListener('DOMContentLoaded', function() {
