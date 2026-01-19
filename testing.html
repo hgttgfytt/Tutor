@@ -1675,6 +1675,9 @@ backdrop-filter: blur(7px);
 
 </select>
 
+<input type="file" id="background-upload" accept="image/*">
+
+
 
   
 <a   onclick="openGame()"  class="round-btn">Hide url</a>
@@ -2103,26 +2106,41 @@ backdrop-filter: blur(7px);
 
 
 <script>
-  document.addEventListener("DOMContentLoaded", function() {
-// Get the select element
-var select = document.getElementById("background-select");
+document.addEventListener("DOMContentLoaded", () => {
+  const select = document.getElementById("background-select");
+  const upload = document.getElementById("background-upload");
+  const body = document.body;
 
-// Set initial background image based on stored preference or default
-var selectedBackground = localStorage.getItem("selectedBackground");
+  // Apply background
+  function setBackground(src) {
+    body.style.backgroundImage = src ? `url(${src})` : "";
+    localStorage.setItem("selectedBackground", src || "");
+  }
 
-if (selectedBackground) {
-  document.body.style.backgroundImage = "url(" + selectedBackground + ")";
-  select.value = selectedBackground;
-}
+  // Load saved background
+  const savedBg = localStorage.getItem("selectedBackground");
+  if (savedBg) setBackground(savedBg);
 
- // Listen for changes in the select element
- select.addEventListener("change", function() {
-   var newBackground = this.value;
-   document.body.style.backgroundImage = "url(" + newBackground + ")";
-   localStorage.setItem("selectedBackground", newBackground);
- });
+  // Dropdown change
+  select.addEventListener("change", () => {
+    if (select.value) {
+      setBackground(select.value);
+    }
+  });
+
+  // Upload custom background
+  upload.addEventListener("change", () => {
+    const file = upload.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setBackground(reader.result); // base64 image
+      select.value = ""; // reset dropdown
+    };
+    reader.readAsDataURL(file);
+  });
 });
-
 </script>
 
 <script>
