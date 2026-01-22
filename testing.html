@@ -2581,22 +2581,20 @@ wins.forEach(win => {
     e.preventDefault();
   });
 
-  // ───────── RESIZE ─────────
-  resizer.addEventListener("mousedown",e=>{
-    const r=win.getBoundingClientRect();
-    if(!hasBeenPositioned){
-      win.style.transform="none";win.style.margin="0";win.style.inset="auto";
-      win.style.left=r.left+"px";win.style.top=r.top+"px";
-      hasBeenPositioned=true;
-    }
-    isResizing=true;
-    disableIframeTemp(); // Disable iframes immediately
-    startX=e.clientX;startY=e.clientY;
-    startWidth=r.width;startHeight=r.height;
-    win.style.width=startWidth+"px";win.style.height=startHeight+"px";
-    win.classList.add('resizing'); // Add class for tracking
-    e.preventDefault();e.stopPropagation();
-  });
+// ───────── RESIZE ─────────
+resizer.addEventListener("mousedown",e=>{
+const r=win.getBoundingClientRect();
+if(!hasBeenPositioned){
+win.style.transform="none";win.style.margin="0";win.style.inset="auto";
+win.style.left=r.left+"px";win.style.top=r.top+"px";
+hasBeenPositioned=true;
+}
+isResizing=true;disableIframeTemp();
+startX=e.clientX;startY=e.clientY;
+startWidth=r.width;startHeight=r.height;
+win.style.width=startWidth+"px";win.style.height=startHeight+"px";
+e.preventDefault();e.stopPropagation();
+});
 
   // ───────── MOVE ─────────
   document.addEventListener("mousemove",e=>{
