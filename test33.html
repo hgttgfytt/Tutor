@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UV Proxy iFrame</title>
+
+<!-- Ultraviolet scripts -->
+<script src="/uv/uv.bundle.js"></script>
+<script src="/uv/uv.config.js"></script>
+
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+}
+iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+</style>
+</head>
+<body>
+
+<iframe id="uvFrame"></iframe>
+
+<script>
+// The URL you want to proxy
+const targetUrl = "https://nowgg.fun/apps/a/19900/b.html";
+
+// Load it through Ultraviolet
+const frame = document.getElementById("uvFrame");
+frame.src = __uv$config.prefix + __uv$config.encodeUrl(targetUrl);
+</script>
+
+</body>
+</html>
