@@ -19,7 +19,7 @@
 
      <div id="imageContainer">
   <a href='/windows11.html'>
-          <img class="btn" src="driftboss.png" alt="windows 11">
+          <img class="btn" src="windows11.png" alt="windows 11">
          </a> 
           <a href='/emulatorjs.html'>
           <img class="btn" src="emulatorjs.png" alt="emulator js">
@@ -106,10 +106,14 @@ html, body {
 
 body {
   overflow: auto; /* still allow scrolling */
-  margin: 0;
-  padding: 0;
   width: 100vw; /* prevent extra space from scrollbar */
   background-image: url("space2.png");
+    background-repeat: no-repeat;
+  background-size: cover;   /* make sure images cover the whole screen */
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  text-decoration: none;
 }
 
 /* Hide scrollbar for Webkit browsers */
@@ -137,29 +141,7 @@ body::-webkit-scrollbar {
     });
   });
 </script>
-<div id="ntv_2103159"></div>
-<script type="text/javascript">
-(function(d) {
-	var params =
-	{
-		bvwidgetid: "ntv_2103159",
-		bvlinksownid: 2103159,
-		rows: 1,
-		cols: 1,
-		textpos: "below",
-		imagewidth: 150,
-		mobilecols: 1,
-		cb: (new Date()).getTime()
-	};
-	params.bvwidgetid = "ntv_2103159" + params.cb;
-	d.getElementById("ntv_2103159").id = params.bvwidgetid;
-	var qs = Object.keys(params).reduce(function(a, k){ a.push(k + '=' + encodeURIComponent(params[k])); return a},[]).join(String.fromCharCode(38));
-	var s = d.createElement('script'); s.type='text/javascript';s.async=true;
-	var p = 'https:' == document.location.protocol ? 'https' : 'http';
-	s.src = p + "://cdn.hyperpromote.com/bidvertiser/tags/active/bdvws.js?" + qs;
-	d.getElementById(params.bvwidgetid).appendChild(s);
-})(document);
-</script>
+
 
 
 <script>
