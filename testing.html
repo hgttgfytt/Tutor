@@ -885,44 +885,62 @@ border: 1px solid rgba(255, 255, 255, 0.15);
 
 </style>
 <script>
-async function loadWidgetWeather(){
-  const loc = await fetch("https://ipapi.co/json/").then(r=>r.json());
+async function loadWidgetWeather() {
+  let loc;
+
+  // --- cache location so we never spam the API ---
+  if (localStorage.weatherGeo) {
+    loc = JSON.parse(localStorage.weatherGeo);
+  } else {
+    const res = await fetch("https://ipwho.is/");
+    loc = await res.json();
+
+    if (!loc.success) throw new Error("Geo lookup failed");
+
+    localStorage.weatherGeo = JSON.stringify(loc);
+  }
 
   const lat = loc.latitude;
   const lon = loc.longitude;
 
-  document.getElementById("wCity").textContent = loc.city;
+  document.getElementById("wCity").textContent = loc.city || "Unknown";
 
+  // --- Open-Meteo (no key) ---
   const data = await fetch(
     `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`
-  ).then(r=>r.json());
+  ).then(r => r.json());
 
   const w = data.current_weather;
+  if (!w) throw new Error("Weather unavailable");
+
   const code = w.weathercode;
   const temp = Math.round(w.temperature);
 
   const map = {
-    0:["☀️","Sunny"],
-    1:["🌤️","Mostly Sunny"],
-    2:["⛅","Partly Cloudy"],
-    3:["☁️","Cloudy"],
-    45:["🌫️","Foggy"],
-    51:["🌦️","Drizzle"],
-    61:["🌧️","Rainy"],
-    63:["🌧️","Rainy"],
-    65:["🌧️","Heavy Rain"],
-    71:["❄️","Snowy"],
-    80:["🌧️","Showers"],
-    95:["⛈️","Storm"]
+    0: ["☀️", "Sunny"],
+    1: ["🌤️", "Mostly Sunny"],
+    2: ["⛅", "Partly Cloudy"],
+    3: ["☁️", "Cloudy"],
+    45: ["🌫️", "Foggy"],
+    51: ["🌦️", "Drizzle"],
+    61: ["🌧️", "Rainy"],
+    63: ["🌧️", "Rainy"],
+    65: ["🌧️", "Heavy Rain"],
+    71: ["❄️", "Snowy"],
+    80: ["🌧️", "Showers"],
+    95: ["⛈️", "Storm"]
   };
 
-  const d = map[code] || ["🌡️","Weather"];
+  const d = map[code] || ["🌡️", "Weather"];
 
   document.getElementById("wIcon").textContent = d[0];
   document.getElementById("wCond").textContent = d[1];
   document.getElementById("wTemp").textContent = temp + "°C";
 }
+
+// run once
 loadWidgetWeather();
+
 </script>
 
 
