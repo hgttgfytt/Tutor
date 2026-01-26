@@ -1,32 +1,53 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>bikes</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>bikes</title>
 
-<!-- Ultraviolet scripts -->
-<script src="/uv/uv.bundle.js"></script>
-<script src="/uv/uv.config.js"></script>
+  <!-- Ultraviolet -->
+  <script src="/uv/uv.bundle.js"></script>
+  <script src="/uv/uv.config.js"></script>
 
-<style>
-html, body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%;
-    background: #000;
-}
-iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-}
-</style>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      color: #0f0;
+      font-family: sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
 </head>
 <body>
 
-<iframe id="uvFrame"></iframe>
+  <div>Loading…</div>
+
+  <script>
+    // Register service worker (REQUIRED)
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").then(() => {
+        loadDiscord();
+      });
+    } else {
+      loadDiscord();
+    }
+
+    function loadDiscord() {
+      const targetUrl = "https://discord.com";
+      location.href =
+        __uv$config.prefix + __uv$config.encodeUrl(targetUrl);
+    }
+  </script>
+
+</body>
+</html>
 
 <script>
 // The URL you want to proxy
@@ -51,5 +72,3 @@ if (
   window.location.replace(randomLink);
 }
 </script>
-</body>
-</html>
