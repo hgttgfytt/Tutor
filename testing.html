@@ -1843,10 +1843,144 @@ requestAnimationFrame(trackFPS);
   
 </style>
 
+<style>
 
+
+
+.icon {
+  position: absolute;
+  width: 80px;
+  text-align: center;
+  cursor: default;
+}
+
+.icon img {
+  width: 48px;
+  height: 48px;
+  pointer-events: none;
+}
+
+.icon span {
+  display: block;
+  font-size: 12px;
+  margin-top: 6px;
+  line-height: 1.2;
+  word-break: break-word;
+  pointer-events: none;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+
+}
+
+/* Optional: selection highlight */
+.icon.selected {
+  background: rgba(0, 120, 255, 0.35);
+  border-radius: 6px;
+}
+.icon:hover {
+  background: rgba(0, 120, 255, 0.35);
+  border-radius: 6px;
+}
+
+
+</style>
   
 </div>
-  
+   <div class="icon" style="left:20px; top:20px;">
+    <img src="https://img.icons8.com/fluency/48/recycle-bin.png" alt="">
+    <span>Recycle Bin</span>
+  </div>
+
+  <div class="icon" style="left:20px; top:120px;">
+    <img src="https://img.icons8.com/color/48/chrome.png" alt="">
+    <span>T9 Browser</span>
+  </div>
+
+  <div class="icon" style="left:20px; top:220px;">
+    <img src="https://img.icons8.com/fluency/48/settings.png" alt="">
+    <span>Settings</span>
+  </div>
+
+<script>
+const icons = document.querySelectorAll('.icon');
+const gridSize = 100; // grid spacing in px
+let isDragging = false;
+let dragStartMouse = { x: 0, y: 0 };
+let dragStartPosition = null;
+let draggingIcon = null;
+
+// Helper: snap to grid
+function snap(value) {
+  return Math.round(value / gridSize) * gridSize;
+}
+
+// Helper: check if a position is occupied
+function isOccupied(x, y, ignoreIcon = null) {
+  for (const ic of icons) {
+    if (ic === ignoreIcon) continue;
+    if (snap(ic.offsetLeft) === snap(x) && snap(ic.offsetTop) === snap(y)) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// ----- Icon mousedown -----
+icons.forEach(icon => {
+  icon.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    draggingIcon = icon;
+    isDragging = true;
+    dragStartMouse = { x: e.clientX, y: e.clientY };
+    dragStartPosition = { x: icon.offsetLeft, y: icon.offsetTop };
+    icon.style.zIndex = 1000; // bring to front
+  });
+});
+
+// ----- Mouse move -----
+document.addEventListener('mousemove', (e) => {
+  if (!isDragging || !draggingIcon) return;
+
+  let dx = e.clientX - dragStartMouse.x;
+  let dy = e.clientY - dragStartMouse.y;
+
+  let newX = dragStartPosition.x + dx;
+  let newY = dragStartPosition.y + dy;
+
+  // Keep inside screen boundaries
+  const maxX = window.innerWidth - draggingIcon.offsetWidth;
+  const maxY = window.innerHeight - draggingIcon.offsetHeight;
+  newX = Math.min(Math.max(newX, 0), maxX);
+  newY = Math.min(Math.max(newY, 0), maxY);
+
+  draggingIcon.style.left = newX + 'px';
+  draggingIcon.style.top = newY + 'px';
+});
+
+// ----- Mouse up -----
+document.addEventListener('mouseup', () => {
+  if (!isDragging || !draggingIcon) return;
+
+  let snappedX = snap(draggingIcon.offsetLeft);
+  let snappedY = snap(draggingIcon.offsetTop);
+
+  // If the snapped spot is occupied, return icon to original position
+  if (isOccupied(snappedX, snappedY, draggingIcon)) {
+    draggingIcon.style.left = dragStartPosition.x + 'px';
+    draggingIcon.style.top = dragStartPosition.y + 'px';
+  } else {
+    draggingIcon.style.left = snappedX + 'px';
+    draggingIcon.style.top = snappedY + 'px';
+  }
+
+  draggingIcon.style.zIndex = '';
+  isDragging = false;
+  draggingIcon = null;
+});
+
+// Prevent text selection while dragging
+document.addEventListener('selectstart', e => e.preventDefault());
+</script>
+
 
 
 
