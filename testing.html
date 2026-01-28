@@ -1901,46 +1901,44 @@ requestAnimationFrame(trackFPS);
 <script>
 const icons = document.querySelectorAll('.icon');
 const gridSize = 100;
+const offsetX = 5;  // Matches your HTML left: 5px
+const offsetY = 20; // Matches your HTML top: 120px/220px grid logic
+
 let draggingIcon = null;
 let mouseOffset = { x: 0, y: 0 };
 let mouseStart = { x: 0, y: 0 };
 let isDragging = false;
-const dragThreshold = 5; 
+const dragThreshold = 5;
 
-function snap(value) {
-  return Math.round(value / gridSize) * gridSize;
-}
+// Precision snapping functions
+const snapX = (v) => Math.round((v - offsetX) / gridSize) * gridSize + offsetX;
+const snapY = (v) => Math.round((v - offsetY) / gridSize) * gridSize + offsetY;
 
-function isOccupied(x, y, ignoreIcon = null) {
-  for (const ic of icons) {
-    if (ic === ignoreIcon) continue;
-    if (snap(ic.offsetLeft) === snap(x) && snap(ic.offsetTop) === snap(y)) {
-      return true;
-    }
-  }
-  return false;
+// Check for collisions using snapped coordinates
+function isOccupied(x, y, ignore) {
+  return Array.from(icons).some(ic => 
+    ic !== ignore && 
+    parseInt(ic.style.left) === x && 
+    parseInt(ic.style.top) === y
+  );
 }
 
 icons.forEach(icon => {
   icon.addEventListener('mousedown', (e) => {
-    // Don't preventDefault here or you might break other interactions
     draggingIcon = icon;
     mouseStart = { x: e.clientX, y: e.clientY };
-
     const rect = icon.getBoundingClientRect();
-    mouseOffset.x = e.clientX - rect.left;
-    mouseOffset.y = e.clientY - rect.top;
-
+    mouseOffset = { x: e.clientX - rect.left, y: e.clientY - rect.top };
     icon.style.zIndex = 1000;
   });
 
-  // Intercept the click event specifically
+  // Captures and blocks the click if the mouse moved (dragging)
   icon.addEventListener('click', (e) => {
     if (isDragging) {
       e.stopImmediatePropagation();
       e.preventDefault();
     }
-  }, true); // Use 'true' for the capture phase to catch it early
+  }, true); 
 });
 
 document.addEventListener('mousemove', (e) => {
@@ -1955,40 +1953,33 @@ document.addEventListener('mousemove', (e) => {
 
   if (!isDragging) return;
 
-  let newX = e.clientX - mouseOffset.x;
-  let newY = e.clientY - mouseOffset.y;
+  // Real-time movement logic
+  let x = Math.min(Math.max(e.clientX - mouseOffset.x, 0), window.innerWidth - draggingIcon.offsetWidth);
+  let y = Math.min(Math.max(e.clientY - mouseOffset.y, 0), window.innerHeight - draggingIcon.offsetHeight);
 
-  const maxX = window.innerWidth - draggingIcon.offsetWidth;
-  const maxY = window.innerHeight - draggingIcon.offsetHeight;
-  newX = Math.min(Math.max(newX, 0), maxX);
-  newY = Math.min(Math.max(newY, 0), maxY);
-
-  draggingIcon.style.left = newX + 'px';
-  draggingIcon.style.top = newY + 'px';
+  draggingIcon.style.left = x + 'px';
+  draggingIcon.style.top = y + 'px';
 });
 
 document.addEventListener('mouseup', () => {
   if (!draggingIcon) return;
 
   if (isDragging) {
-    let snappedX = snap(draggingIcon.offsetLeft);
-    let snappedY = snap(draggingIcon.offsetTop);
+    const targetX = snapX(draggingIcon.offsetLeft);
+    const targetY = snapY(draggingIcon.offsetTop);
 
-    if (isOccupied(snappedX, snappedY, draggingIcon)) {
-      // Simple return to snapped original if occupied
-      draggingIcon.style.left = snap(mouseStart.x - mouseOffset.x) + 'px';
-      draggingIcon.style.top = snap(mouseStart.y - mouseOffset.y) + 'px';
+    if (isOccupied(targetX, targetY, draggingIcon)) {
+      // Snap back to original grid spot if blocked
+      draggingIcon.style.left = snapX(mouseStart.x - mouseOffset.x) + 'px';
+      draggingIcon.style.top = snapY(mouseStart.y - mouseOffset.y) + 'px';
     } else {
-      draggingIcon.style.left = snappedX + 'px';
-      draggingIcon.style.top = snappedY + 'px';
+      // Lock into new grid spot
+      draggingIcon.style.left = targetX + 'px';
+      draggingIcon.style.top = targetY + 'px';
     }
-    
-    // THE FIX: Wait until the click event finishes before resetting isDragging
-    setTimeout(() => {
-      isDragging = false;
-    }, 50); 
-  } else {
-    isDragging = false;
+
+    // Delay resetting the flag so 'click' event doesn't trigger 's()'
+    setTimeout(() => { isDragging = false; }, 50);
   }
 
   draggingIcon.style.zIndex = '';
