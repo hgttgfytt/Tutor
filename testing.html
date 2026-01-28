@@ -1976,9 +1976,9 @@ requestAnimationFrame(trackFPS);
 <script>
 const icons = document.querySelectorAll('.icon');
 const gridSize = 100;
-const offsetX = 5; 
-const offsetY = 20; 
-const NAVBAR_WIDTH = 70; // Adjust this to the actual width of your navbar
+const offsetX = 5;  // Matches your initial left: 5px
+const offsetY = 20; // Alignment for your top: 120px/220px
+const NAVBAR_WIDTH = 100; // Prevents icons from hiding under your sidebar
 
 let draggingIcon = null;
 let mouseOffset = { x: 0, y: 0 };
@@ -1986,9 +1986,11 @@ let mouseStart = { x: 0, y: 0 };
 let isDragging = false;
 const dragThreshold = 5;
 
+// Snap logic including the offset
 const snapX = (v) => Math.round((v - offsetX) / gridSize) * gridSize + offsetX;
 const snapY = (v) => Math.round((v - offsetY) / gridSize) * gridSize + offsetY;
 
+// Check actual pixel positions to allow for the 10px nudges
 function isOccupied(x, y, ignore) {
   return Array.from(icons).some(ic => 
     ic !== ignore && 
@@ -2006,12 +2008,13 @@ icons.forEach(icon => {
     icon.style.zIndex = 1000;
   });
 
+  // Block the onclick function if we were dragging
   icon.addEventListener('click', (e) => {
     if (isDragging) {
       e.stopImmediatePropagation();
       e.preventDefault();
     }
-  }, true);
+  }, true); 
 });
 
 document.addEventListener('mousemove', (e) => {
@@ -2035,16 +2038,12 @@ document.addEventListener('mouseup', () => {
     let targetX = snapX(draggingIcon.offsetLeft);
     let targetY = snapY(draggingIcon.offsetTop);
 
-    // Collision Logic: Navbar and other icons
-    // If it touches the navbar (left side) or another icon, move 10px right until clear
+    // THE FIX: If icon hits navbar OR another icon, move 10px right until clear
     while (targetX < NAVBAR_WIDTH || isOccupied(targetX, targetY, draggingIcon)) {
       targetX += 10;
       
-      // Safety break to prevent infinite loop if screen is full
-      if (targetX > window.innerWidth - draggingIcon.offsetWidth) {
-          targetX = offsetX; // Reset to start or handle overflow
-          break;
-      }
+      // Safety break to stop icon from going off-screen
+      if (targetX > window.innerWidth - 80) break; 
     }
 
     draggingIcon.style.left = targetX + 'px';
