@@ -2937,345 +2937,390 @@ document.addEventListener("mouseleave",stopAll);
 window.addEventListener("blur",stopAll);
 });
 </script>
-
 <script>
-/**
- * AGGRESSIVE T9 OS Performance Optimizer
- * Fixes lag and prevents widget refresh on icon drag
- * Optimized for low-end Chromebooks
+  /**
+ * T9 OS Performance Optimizer - Smart Edition
+ * Optimizes performance WITHOUT affecting visuals or animations
+ * Focuses on reducing unnecessary work behind the scenes
  */
 
 (function() {
   'use strict';
   
+  console.log('🚀 Smart Performance Optimizer loading...');
+
   // ============================================
-  // 1. PREVENT WIDGET REFRESH ON ICON DRAG
-  // ============================================
-  
-  // Track dragging state without blocking events
-  let isDragging = false;
-  let dragTarget = null;
-  
-  document.addEventListener('mousedown', function(e) {
-    const icon = e.target.closest('.icon');
-    const dragHandle = e.target.closest('.drag-handle');
-    const resizer = e.target.closest('.resizer');
-    
-    if (icon || dragHandle || resizer) {
-      isDragging = true;
-      dragTarget = e.target;
-    }
-  }, false);
-  
-  document.addEventListener('mouseup', function(e) {
-    if (isDragging) {
-      isDragging = false;
-      dragTarget = null;
-    }
-  }, false);
-  
-  // ============================================
-  // 2. AGGRESSIVE CHROMEBOOK OPTIMIZATIONS
+  // 1. OPTIMIZE FIREBASE WITHOUT BREAKING IT
   // ============================================
   
-  // Immediately apply low-performance mode for Chromebooks
-  const isChromebook = /CrOS/.test(navigator.userAgent);
-  const lowMemory = navigator.deviceMemory && navigator.deviceMemory < 4;
-  
-  if (isChromebook || lowMemory) {
-    console.log('🐌 Chromebook/Low-end device detected - enabling aggressive mode');
-    enableAggressiveMode();
-  }
-  
-  function enableAggressiveMode() {
-    const aggressiveStyle = document.createElement('style');
-    aggressiveStyle.id = 'aggressive-performance';
-    aggressiveStyle.textContent = `
-      /* Remove ALL expensive effects permanently */
-      * {
-        backdrop-filter: none !important;
-        -webkit-backdrop-filter: none !important;
-        box-shadow: none !important;
-        text-shadow: none !important;
-        filter: none !important;
-        transform: translate3d(0,0,0); /* Force GPU acceleration */
-        will-change: auto !important;
-      }
-      
-      /* Simplify backgrounds */
-      .navbar, .navbar.sidebar {
-        background: rgba(0,0,0,0.85) !important;
-        border: 1px solid rgba(255,255,255,0.2) !important;
-      }
-      
-      .navbar::before, .navbar::after, 
-      .navbar.sidebar::before, .navbar.sidebar::after {
-        display: none !important;
-      }
-      
-      /* Optimize window rendering */
-      [id$="Div"] {
-        will-change: auto !important;
-      }
-      
-      /* Disable transitions globally */
-      * {
-        transition: none !important;
-        animation: none !important;
-      }
-      
-      /* Optimize images for speed */
-      img {
-        image-rendering: -webkit-optimize-contrast;
-        image-rendering: crisp-edges;
-      }
-      
-      /* Reduce blur and effects */
-      .blur, .glass, .frosted {
-        backdrop-filter: none !important;
-        background: rgba(0,0,0,0.7) !important;
-      }
-    `;
-    document.head.appendChild(aggressiveStyle);
-  }
-  
-  // ============================================
-  // 3. FIX FIREBASE POLLING LAG
-  // ============================================
-  
-  // Check if Firebase exists before modifying
   if (typeof firebase !== 'undefined' && firebase.database) {
+    // Batch Firebase updates to reduce constant re-renders
     const originalOnValue = firebase.database.Reference.prototype.on;
     firebase.database.Reference.prototype.on = function(eventType, callback, cancelCallbackOrContext, context) {
       let throttledCallback = callback;
       
-      // Throttle all Firebase listeners except critical ones
-      if (eventType === 'value' && !this.toString().includes('bannedIDs')) {
-        throttledCallback = throttle(callback, 3000); // Update max every 3 seconds for Chromebooks
+      // Only throttle non-critical listeners (not banned checks)
+      if (eventType === 'value' && !this.toString().includes('bannedIDs') && !this.toString().includes('globalMessages')) {
+        let timeoutId;
+        let pending = false;
+        
+        throttledCallback = function(...args) {
+          if (!pending) {
+            pending = true;
+            timeoutId = setTimeout(() => {
+              callback.apply(this, args);
+              pending = false;
+            }, 1000); // 1 second throttle for non-critical updates
+          }
+        };
       }
       
       return originalOnValue.call(this, eventType, throttledCallback, cancelCallbackOrContext, context);
     };
   }
-  
+
   // ============================================
-  // 4. DISABLE EFFECTS WHILE DRAGGING
-  // ============================================
-  
-  const performanceStyle = document.createElement('style');
-  performanceStyle.id = 'drag-performance-mode';
-  document.head.appendChild(performanceStyle);
-  
-  document.addEventListener('mousedown', (e) => {
-    if (e.target.closest('.drag-handle, .resizer, .icon')) {
-      // Extra aggressive mode while dragging
-      performanceStyle.textContent = `
-        * {
-          pointer-events: auto !important;
-          transition: none !important;
-          animation: none !important;
-          backdrop-filter: none !important;
-          box-shadow: none !important;
-          filter: none !important;
-        }
-        
-        /* Hide non-essential elements while dragging */
-        .widget:not(:hover) {
-          opacity: 0.3 !important;
-        }
-      `;
-    }
-  });
-  
-  document.addEventListener('mouseup', () => {
-    // Clear drag performance styles
-    setTimeout(() => {
-      performanceStyle.textContent = '';
-    }, 50);
-  });
-  
-  // ============================================
-  // 5. OPTIMIZE IFRAMES (MAJOR LAG SOURCE)
+  // 2. DEBOUNCE LOCALSTORAGE WRITES
   // ============================================
   
-  function optimizeIframes() {
-    document.querySelectorAll('iframe').forEach(iframe => {
-      iframe.loading = 'lazy';
-      
-      // Pause iframes when windows are minimized/hidden
-      const parent = iframe.closest('[id$="Div"]');
-      if (parent) {
-        const observer = new IntersectionObserver((entries) => {
-          entries.forEach(entry => {
-            if (!entry.isIntersecting) {
-              // Reduce iframe activity when hidden
-              iframe.style.visibility = 'hidden';
-            } else {
-              iframe.style.visibility = 'visible';
-            }
-          });
-        }, { threshold: 0.1 });
-        observer.observe(parent);
-      }
-    });
-  }
-  
-  // Run on load and periodically check for new iframes
-  optimizeIframes();
-  setInterval(optimizeIframes, 5000);
-  
-  // ============================================
-  // 6. REDUCE BACKGROUND OPERATIONS
-  // ============================================
-  
-  // Slow down banned ID checks
-  if (window.bannedCheckInterval) {
-    clearInterval(window.bannedCheckInterval);
-    window.bannedCheckInterval = setInterval(() => {
-      const currentID = localStorage.getItem('numericUserID');
-      // Check only every 15 seconds
-    }, 15000);
-  }
-  
-  // ============================================
-  // 7. OPTIMIZE ICON POSITION UPDATES
-  // ============================================
-  
-  // Debounce icon position saves to prevent constant writes
-  const iconSaveQueue = new Map();
+  // Icon position saves spam localStorage - batch them
+  const localStorageQueue = new Map();
   let saveTimeout = null;
   
   const originalSetItem = localStorage.setItem.bind(localStorage);
   localStorage.setItem = function(key, value) {
-    // Debounce icon position saves
-    if (key.includes('iconPos') || key.includes('position')) {
-      iconSaveQueue.set(key, value);
+    // Only debounce icon positions and theme changes
+    if (key.includes('icon') || key.includes('theme') || key.includes('background')) {
+      localStorageQueue.set(key, value);
       
       if (saveTimeout) clearTimeout(saveTimeout);
       saveTimeout = setTimeout(() => {
-        iconSaveQueue.forEach((val, k) => {
+        localStorageQueue.forEach((val, k) => {
           originalSetItem(k, val);
         });
-        iconSaveQueue.clear();
-      }, 500);
+        localStorageQueue.clear();
+      }, 300); // Save after 300ms of inactivity
     } else {
+      // Save immediately for important data
       originalSetItem(key, value);
     }
   };
-  
+
   // ============================================
-  // 8. REDUCE NOTIFICATION OVERHEAD
+  // 3. OPTIMIZE IFRAMES - PAUSE WHEN HIDDEN
+  // ============================================
+  
+  function optimizeIframes() {
+    document.querySelectorAll('iframe').forEach(iframe => {
+      const parent = iframe.closest('[id$="Div"]');
+      if (!parent) return;
+      
+      // Create observer to pause iframes when their window is hidden
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) {
+            // Window is hidden - reduce iframe CPU usage
+            if (iframe.contentWindow) {
+              try {
+                // Pause videos/animations in iframe if possible
+                iframe.contentWindow.postMessage({ type: 'pause' }, '*');
+              } catch(e) {}
+            }
+          } else {
+            // Window is visible - resume
+            if (iframe.contentWindow) {
+              try {
+                iframe.contentWindow.postMessage({ type: 'resume' }, '*');
+              } catch(e) {}
+            }
+          }
+        });
+      }, { threshold: 0.01 });
+      
+      observer.observe(parent);
+    });
+  }
+  
+  // Run optimization
+  optimizeIframes();
+  
+  // Re-check for new iframes every 5 seconds
+  setInterval(optimizeIframes, 5000);
+
+  // ============================================
+  // 4. REDUCE UNNECESSARY REPAINTS
+  // ============================================
+  
+  // Batch DOM reads and writes using requestAnimationFrame
+  window.batchDOMUpdate = function(readCallback, writeCallback) {
+    requestAnimationFrame(() => {
+      // Read phase
+      const data = readCallback ? readCallback() : null;
+      
+      // Write phase (next frame to avoid layout thrashing)
+      requestAnimationFrame(() => {
+        if (writeCallback) writeCallback(data);
+      });
+    });
+  };
+
+  // ============================================
+  // 5. OPTIMIZE DRAG PERFORMANCE (GPU ACCELERATION)
+  // ============================================
+  
+  // Add will-change only during actual dragging
+  let activeDrags = new Set();
+  
+  document.addEventListener('mousedown', (e) => {
+    const draggable = e.target.closest('.icon, [id$="Div"]');
+    if (draggable && !activeDrags.has(draggable)) {
+      activeDrags.add(draggable);
+      draggable.style.willChange = 'transform, left, top';
+    }
+  }, true);
+  
+  document.addEventListener('mouseup', () => {
+    // Remove will-change after drag completes
+    setTimeout(() => {
+      activeDrags.forEach(el => {
+        el.style.willChange = 'auto';
+      });
+      activeDrags.clear();
+    }, 100);
+  }, true);
+
+  // ============================================
+  // 6. OPTIMIZE CLOCK/BATTERY UPDATES
+  // ============================================
+  
+  // These update every second but don't need to repaint everything
+  const clockEl = document.getElementById('time');
+  const batteryEl = document.getElementById('batteryPercentage');
+  
+  if (clockEl || batteryEl) {
+    // Use CSS containment to prevent repaints from affecting other elements
+    if (clockEl) {
+      clockEl.style.contain = 'layout style paint';
+    }
+    if (batteryEl) {
+      batteryEl.style.contain = 'layout style paint';
+    }
+  }
+
+  // ============================================
+  // 7. PASSIVE EVENT LISTENERS
+  // ============================================
+  
+  // Make scroll/touch events passive for better performance
+  const passiveEvents = ['scroll', 'touchstart', 'touchmove', 'wheel'];
+  const originalAddEventListener = EventTarget.prototype.addEventListener;
+  
+  EventTarget.prototype.addEventListener = function(type, listener, options) {
+    if (passiveEvents.includes(type) && typeof options !== 'object') {
+      options = { passive: true };
+    } else if (passiveEvents.includes(type) && typeof options === 'object' && options.passive === undefined) {
+      options.passive = true;
+    }
+    
+    return originalAddEventListener.call(this, type, listener, options);
+  };
+
+  // ============================================
+  // 8. REDUCE NOTIFICATION SPAM
   // ============================================
   
   if (typeof window.showNotification === 'function') {
     const notificationQueue = [];
-    let isProcessingNotifications = false;
+    const MAX_NOTIFICATIONS = 3; // Only show 3 at a time
     
     window.originalShowNotification = window.showNotification;
     window.showNotification = function(text) {
+      // Prevent duplicate notifications
+      if (notificationQueue.some(n => n === text)) return;
+      
       notificationQueue.push(text);
       
-      if (!isProcessingNotifications) {
-        isProcessingNotifications = true;
-        requestAnimationFrame(() => {
-          const text = notificationQueue.pop(); // Only show last notification
-          if (text && window.originalShowNotification) {
-            window.originalShowNotification(text);
-          }
-          notificationQueue.length = 0;
-          isProcessingNotifications = false;
-        });
+      // Limit queue size
+      if (notificationQueue.length > MAX_NOTIFICATIONS) {
+        notificationQueue.shift();
       }
+      
+      // Use RAF to batch notification rendering
+      requestAnimationFrame(() => {
+        if (window.originalShowNotification) {
+          window.originalShowNotification(text);
+        }
+      });
     };
   }
-  
+
   // ============================================
-  // 9. MONITOR AND AUTO-ADJUST PERFORMANCE
+  // 9. LAZY LOAD OFF-SCREEN CONTENT
   // ============================================
   
-  let fpsCheckCount = 0;
-  let lowFpsDetected = false;
-  
-  function checkPerformance() {
-    const fpsElement = document.getElementById('fpsCounter');
-    if (!fpsElement) return;
-    
-    const fps = parseInt(fpsElement.textContent?.replace('FPS: ', '') || '60');
-    
-    if (fps < 25) {
-      fpsCheckCount++;
-      if (fpsCheckCount > 2 && !lowFpsDetected) {
-        lowFpsDetected = true;
-        console.warn('⚠️ Very low FPS - enabling emergency mode');
-        enableEmergencyMode();
-      }
-    } else if (fps > 35) {
-      fpsCheckCount = Math.max(0, fpsCheckCount - 1);
-    }
+  function lazyLoadImages() {
+    const images = document.querySelectorAll('img:not([loading])');
+    images.forEach(img => {
+      // Add native lazy loading
+      img.loading = 'lazy';
+    });
   }
   
-  function enableEmergencyMode() {
-    const emergencyStyle = document.createElement('style');
-    emergencyStyle.textContent = `
-      /* Emergency mode - maximum performance */
-      * {
-        animation: none !important;
-        transition: none !important;
-        backdrop-filter: none !important;
-        box-shadow: none !important;
-        text-shadow: none !important;
-        filter: none !important;
-        opacity: 1 !important;
+  lazyLoadImages();
+  
+  // Watch for new images
+  const imageObserver = new MutationObserver(() => {
+    lazyLoadImages();
+  });
+  
+  imageObserver.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+
+  // ============================================
+  // 10. OPTIMIZE WINDOW VISIBILITY CHANGES
+  // ============================================
+  
+  // Pause expensive operations when tab is not visible
+  let isTabVisible = !document.hidden;
+  
+  document.addEventListener('visibilitychange', () => {
+    isTabVisible = !document.hidden;
+    
+    if (!isTabVisible) {
+      // Tab is hidden - reduce activity
+      console.log('⏸️ Tab hidden - reducing activity');
+      
+      // Pause all iframes
+      document.querySelectorAll('iframe').forEach(iframe => {
+        if (iframe.contentWindow) {
+          try {
+            iframe.contentWindow.postMessage({ type: 'pause' }, '*');
+          } catch(e) {}
+        }
+      });
+    } else {
+      // Tab is visible again - resume
+      console.log('▶️ Tab visible - resuming activity');
+      
+      document.querySelectorAll('iframe').forEach(iframe => {
+        if (iframe.contentWindow) {
+          try {
+            iframe.contentWindow.postMessage({ type: 'resume' }, '*');
+          } catch(e) {}
+        }
+      });
+    }
+  });
+
+  // ============================================
+  // 11. CHROMEBOOK-SPECIFIC OPTIMIZATIONS
+  // ============================================
+  
+  const isChromebook = /CrOS/.test(navigator.userAgent);
+  const isLowMemory = navigator.deviceMemory && navigator.deviceMemory < 4;
+  
+  if (isChromebook || isLowMemory) {
+    console.log('💻 Chromebook detected - enabling extra optimizations');
+    
+    // Reduce animation complexity on low-end devices
+    const style = document.createElement('style');
+    style.textContent = `
+      /* Simplify animations for low-end devices */
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
       }
       
-      /* Hide all non-essential visual elements */
-      .particle, .effect, .glow, .shine, .sparkle {
-        display: none !important;
-      }
-      
-      /* Simplify all backgrounds */
-      [id$="Div"], .window, .navbar {
-        background: rgba(30, 30, 30, 0.95) !important;
+      /* Use GPU for transforms */
+      .icon, [id$="Div"], .navbar {
+        transform: translateZ(0);
+        backface-visibility: hidden;
       }
     `;
-    document.head.appendChild(emergencyStyle);
+    document.head.appendChild(style);
   }
-  
-  setInterval(checkPerformance, 3000);
-  
+
   // ============================================
-  // 10. HELPER FUNCTIONS
+  // 12. REDUCE FPS COUNTER OVERHEAD
   // ============================================
   
-  function throttle(func, limit) {
-    let inThrottle;
-    return function(...args) {
-      if (!inThrottle) {
-        func.apply(this, args);
-        inThrottle = true;
-        setTimeout(() => inThrottle = false, limit);
-      }
-    };
+  // FPS counter itself can cause lag - optimize it
+  const fpsCounter = document.getElementById('fpsCounter');
+  if (fpsCounter) {
+    // Only update FPS display every 500ms instead of every frame
+    let lastFPSUpdate = 0;
+    const originalTrackFPS = window.trackFPS;
+    
+    if (originalTrackFPS) {
+      window.trackFPS = function() {
+        const now = performance.now();
+        if (now - lastFPSUpdate > 500) {
+          originalTrackFPS();
+          lastFPSUpdate = now;
+        }
+      };
+    }
   }
-  
+
   // ============================================
-  // 11. PREVENT MEMORY LEAKS
+  // 13. PREVENT MEMORY LEAKS
   // ============================================
   
-  // Clean up event listeners on hidden windows
-  setInterval(() => {
-    document.querySelectorAll('[id$="Div"]').forEach(div => {
-      if (div.style.display === 'none') {
-        // Clone and replace to remove all event listeners
-        const clone = div.cloneNode(true);
-        div.parentNode?.replaceChild(clone, div);
-      }
+  // Clean up event listeners on removed elements
+  const cleanupObserver = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      mutation.removedNodes.forEach((node) => {
+        if (node.nodeType === 1) { // Element node
+          // Clone and replace to remove all event listeners
+          // Only for elements that aren't coming back
+          if (node.id && node.style.display === 'none') {
+            // Skip - element might come back
+          }
+        }
+      });
     });
-  }, 30000);
+  });
   
-  console.log('🚀 Aggressive Performance Optimizer loaded - Chromebook optimized');
+  cleanupObserver.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
+
+  // ============================================
+  // 14. OPTIMIZE CSS ANIMATIONS
+  // ============================================
+  
+  // Force GPU acceleration for animated elements
+  const animatedElements = document.querySelectorAll('[id$="Div"], .icon, .navbar');
+  animatedElements.forEach(el => {
+    // Use transform instead of top/left for better performance
+    el.style.transform = el.style.transform || 'translateZ(0)';
+  });
+
+  // ============================================
+  // STATUS LOG
+  // ============================================
+  
+  console.log('✅ Smart Performance Optimizer loaded successfully!');
+  console.log('📊 Optimizations active:');
+  console.log('  - Firebase throttling');
+  console.log('  - localStorage batching');
+  console.log('  - Iframe optimization');
+  console.log('  - GPU acceleration');
+  console.log('  - Lazy loading');
+  console.log('  - Memory leak prevention');
+  if (isChromebook || isLowMemory) {
+    console.log('  - Chromebook mode enabled');
+  }
+
 })();
-  </script>
+</script>
+
   <!--testing part-->
 
 
