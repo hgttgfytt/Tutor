@@ -2939,14 +2939,14 @@ window.addEventListener("blur",stopAll);
 </script>
 
 <script>
-/**
+  /**
  * AGGRESSIVE T9 OS Performance Optimizer
  * Fixes the actual lag sources
  */
 
 (function() {
   'use strict';
-
+  
   // ============================================
   // 1. FIX FIREBASE POLLING LAG
   // ============================================
@@ -2963,7 +2963,7 @@ window.addEventListener("blur",stopAll);
     
     return originalOnValue.call(this, eventType, throttledCallback, cancelCallbackOrContext, context);
   };
-
+  
   // ============================================
   // 2. FIX DRAG/RESIZE LAG
   // ============================================
@@ -2992,7 +2992,7 @@ window.addEventListener("blur",stopAll);
       });
     }
   }, { passive: true });
-
+  
   // ============================================
   // 3. DISABLE EFFECTS WHILE DRAGGING
   // ============================================
@@ -3026,7 +3026,7 @@ window.addEventListener("blur",stopAll);
       }, 100);
     }
   });
-
+  
   // ============================================
   // 4. OPTIMIZE ICON DRAGGING
   // ============================================
@@ -3047,7 +3047,7 @@ window.addEventListener("blur",stopAll);
     // Update cache only when drag ends
     icon.addEventListener('mouseup', updateCache);
   });
-
+  
   // ============================================
   // 5. REDUCE BACKGROUND OPERATIONS
   // ============================================
@@ -3058,7 +3058,7 @@ window.addEventListener("blur",stopAll);
     const currentID = localStorage.getItem('numericUserID');
     // Only check every 10 seconds instead of 100ms
   }, 10000);
-
+  
   // ============================================
   // 6. OPTIMIZE IFRAMES
   // ============================================
@@ -3083,7 +3083,7 @@ window.addEventListener("blur",stopAll);
       observer.observe(parent);
     }
   });
-
+  
   // ============================================
   // 7. BATCH DOM UPDATES
   // ============================================
@@ -3094,7 +3094,7 @@ window.addEventListener("blur",stopAll);
       Object.assign(element.style, styles);
     });
   };
-
+  
   // ============================================
   // 8. REDUCE NOTIFICATION OVERHEAD
   // ============================================
@@ -3118,7 +3118,7 @@ window.addEventListener("blur",stopAll);
       });
     }
   };
-
+  
   // ============================================
   // 9. SIMPLIFY CSS ON LOW-END DEVICES
   // ============================================
@@ -3162,10 +3162,6 @@ window.addEventListener("blur",stopAll);
         display: none !important;
       }
       
-      [id$="Div"] {
-        background: rgba(5, 139, 196, 0.9) !important;
-      }
-      
       img {
         image-rendering: -webkit-optimize-contrast;
       }
@@ -3174,7 +3170,7 @@ window.addEventListener("blur",stopAll);
   }
   
   setInterval(checkPerformance, 5000);
-
+  
   // ============================================
   // 10. HELPER FUNCTIONS
   // ============================================
@@ -3189,10 +3185,10 @@ window.addEventListener("blur",stopAll);
       }
     };
   }
-
+  
   console.log('🚀 Aggressive Performance Optimizer loaded');
 })();
-</script>
+  </script>
 
 
 
