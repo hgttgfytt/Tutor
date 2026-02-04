@@ -399,5 +399,14 @@ if (
 </script>
 
 
+<script>
+window.addEventListener('beforeunload', function (e) {
+    e.preventDefault();
+    e.returnValue = '';
+    return '';
+});
+</script>
+
+
 </body>
 </html>
