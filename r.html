@@ -14,6 +14,7 @@
 
 <style>
 * { box-sizing: border-box; font-family: Inter, system-ui; }
+
 html, body {
     margin: 0;
     width: 100%;
@@ -22,7 +23,7 @@ html, body {
     overflow: hidden;
 }
 
-/* ===== UI ===== */
+/* ===== TOP BAR ===== */
 .browser-ui {
     height: 96px;
     background: #2b2b2b;
@@ -32,6 +33,7 @@ html, body {
     z-index: 10;
 }
 
+/* ===== TABS ===== */
 .tabs {
     height: 38px;
     display: flex;
@@ -86,6 +88,7 @@ html, body {
 }
 .newtab:hover { background: #444; }
 
+/* ===== NAV BAR ===== */
 .navbar {
     height: 58px;
     display: flex;
@@ -108,6 +111,7 @@ html, body {
     color: white;
 }
 
+/* ===== URL BAR ===== */
 .urlbar {
     flex: 1;
     height: 36px;
@@ -120,13 +124,15 @@ html, body {
 
 .urlbar input {
     width: 100%;
+    height: 100%;
     background: transparent;
     border: none;
     outline: none;
     color: white;
+    font-size: 14px;
 }
 
-/* ===== CONTENT ===== */
+/* ===== VIEWPORT ===== */
 .viewframe {
     position: absolute;
     top: 96px;
@@ -136,18 +142,31 @@ html, body {
     border: none;
     display: none;
 }
-.viewframe.active { display: block; }
 
+.viewframe.active {
+    display: block;
+}
+
+/* ===== NTP ===== */
 .ntp {
     position: absolute;
     top: 96px;
     left: 0;
     width: 100%;
     height: calc(100% - 96px);
-    display: none;
+    display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: #ffffff;
+    pointer-events: none;
+}
+body{
+      background-repeat: no-repeat;
+  background-size: cover;   /* make sure images cover the whole screen */
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  text-decoration: none;
 }
 </style>
 </head>
@@ -191,6 +210,70 @@ let tabs = []
 let activeId = null
 let idCounter = 0
 
+function createTab(url = "") {
+    const id = idCounter++
+
+    const iframe = document.createElement("iframe")
+    iframe.className = "viewframe"
+    iframe.dataset.id = id
+
+    iframe.setAttribute("sandbox",
+        "allow-scripts allow-same-origin allow-forms allow-modals allow-popups"
+    )
+
+    document.body.appendChild(iframe)
+
+    const tabBtn = document.createElement("div")
+    tabBtn.className = "tab"
+    tabBtn.dataset.id = id
+    tabBtn.innerHTML = `<span>New Tab</span><i class="fas fa-xmark"></i>`
+
+    tabBtn.addEventListener("click", e => {
+        if (e.target.tagName === "I") closeTab(id)
+        else activateTab(id)
+    })
+
+    tabsEl.insertBefore(tabBtn, newTabBtn)
+
+    tabs.push({ id, iframe, tabBtn, history: [], index: -1 })
+    activateTab(id)
+
+    if (url) navigate(url)
+}
+
+function activateTab(id) {
+    activeId = id
+
+    tabs.forEach(t => {
+        t.iframe.classList.toggle("active", t.id === id)
+        t.tabBtn.classList.toggle("active", t.id === id)
+    })
+
+    const tab = getTab()
+    if (!tab) return
+
+    if (tab.index >= 0) {
+        urlInput.value = tab.history[tab.index]
+        ntp.style.display = "none"
+    } else {
+        urlInput.value = ""
+        ntp.style.display = "flex"
+    }
+}
+
+function closeTab(id) {
+    if (tabs.length === 1) return
+
+    const i = tabs.findIndex(t => t.id === id)
+    const tab = tabs[i]
+
+    tab.iframe.remove()
+    tab.tabBtn.remove()
+    tabs.splice(i, 1)
+
+    activateTab(tabs[Math.max(0, i - 1)].id)
+}
+
 function normalize(input) {
     if (!input.includes(".")) {
         return "https://search.brave.com/search?q=" + encodeURIComponent(input)
@@ -199,123 +282,67 @@ function normalize(input) {
     return input
 }
 
-/* ===== TABS ===== */
-function createTab(startUrl = "") {
-    const id = idCounter++
+function navigate(input, push = true) {
+    const tab = getTab()
+    if (!tab) return
 
-    const iframe = document.createElement("iframe")
-    iframe.className = "viewframe"
-    iframe.dataset.id = id
-    iframe.setAttribute("sandbox","allow-scripts allow-same-origin allow-forms allow-modals allow-popups")
+    const url = normalize(input)
 
-    document.body.appendChild(iframe)
-
-    const tabBtn = document.createElement("div")
-    tabBtn.className = "tab"
-    tabBtn.dataset.id = id
-    tabBtn.innerHTML = `<span>T9 Browser</span><i class="fas fa-xmark"></i>`
-
-    tabBtn.onclick = e => {
-        if (e.target.tagName === "I") closeTab(id)
-        else activateTab(id)
+    if (push) {
+        tab.history = tab.history.slice(0, tab.index + 1)
+        tab.history.push(url)
+        tab.index++
     }
 
-    tabsEl.insertBefore(tabBtn, newTabBtn)
+    tab.iframe.src = __uv$config.prefix + __uv$config.encodeUrl(url)
+    urlInput.value = url
+    ntp.style.display = "none"
 
-    const tab = { id, iframe, tabBtn, history: [], index: -1, reloaded:false }
-    tabs.push(tab)
-    activateTab(id)
-
-    if (startUrl) navigate(startUrl)
-}
-
-function activateTab(id) {
-    activeId = id
-    tabs.forEach(t => {
-        t.iframe.classList.toggle("active", t.id === id)
-        t.tabBtn.classList.toggle("active", t.id === id)
-    })
-
-    const t = getTab()
-    if (!t || t.history.length === 0) {
-        ntp.style.display = "flex"
-        urlInput.value = ""
-    } else {
-        ntp.style.display = "none"
-        urlInput.value = t.history[t.index]
+    tab.iframe.onload = () => {
+        tab.tabBtn.querySelector("span").textContent =
+            tab.iframe.contentDocument?.title || new URL(url).hostname
     }
-}
-
-function closeTab(id) {
-    if (tabs.length === 1) return
-    const i = tabs.findIndex(t => t.id === id)
-    if (i === -1) return
-    tabs[i].iframe.remove()
-    tabs[i].tabBtn.remove()
-    tabs.splice(i,1)
-    activateTab(tabs[Math.max(0,i-1)].id)
 }
 
 function getTab() {
     return tabs.find(t => t.id === activeId)
 }
 
-/* ===== NAVIGATION ===== */
-function navigate(input, push=true) {
-    const t = getTab()
-    if (!t) return
-
-    const url = normalize(input)
-
-    if (push) {
-        t.history = t.history.slice(0, t.index+1)
-        t.history.push(url)
-        t.index++
-    }
-
-    const proxied = __uv$config.prefix + __uv$config.encodeUrl(url)
-    t.iframe.src = proxied
-    ntp.style.display = "none"
-    urlInput.value = url
-
-    // 🔁 auto-reload ONCE if UV errors
-    t.iframe.onerror = () => {
-        if (!t.reloaded) {
-            t.reloaded = true
-            setTimeout(() => t.iframe.src = proxied, 600)
-        }
-    }
-}
-
 /* ===== CONTROLS ===== */
 back.onclick = () => {
-    const t=getTab()
-    if(!t || t.index<=0) return
+    const t = getTab()
+    if (!t || t.index <= 0) return
     t.index--
     navigate(t.history[t.index], false)
 }
+
 forward.onclick = () => {
-    const t=getTab()
-    if(!t || t.index>=t.history.length-1) return
+    const t = getTab()
+    if (!t || t.index >= t.history.length - 1) return
     t.index++
     navigate(t.history[t.index], false)
 }
+
 reload.onclick = () => {
-    const t=getTab()
-    if(t) t.iframe.src = t.iframe.src
+    const t = getTab()
+    if (!t) return
+    t.iframe.src = t.iframe.src
 }
+
 popout.onclick = () => {
-    const t=getTab()
-    if(t) window.open(t.iframe.src,"_blank")
+    const t = getTab()
+    if (!t) return
+    window.open(t.iframe.src, "_blank")
 }
+
 form.onsubmit = e => {
     e.preventDefault()
-    if(urlInput.value.trim()) navigate(urlInput.value)
+    if (urlInput.value.trim()) navigate(urlInput.value)
 }
+
 newTabBtn.onclick = () => createTab()
 
-/* ===== STARTUP ===== */
-createTab("https://nowgg.lol/apps/a/10011/b.html")
+createTab()
 </script>
 <script>
 document.addEventListener("DOMContentLoaded", () => {
@@ -354,22 +381,30 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 </script>
+
 <script>
 if (
   (location.hostname === "t9os.space" || location.hostname === "www.t9os.space") &&
-  location.pathname === "/stumble.html"
+  location.pathname === "/r.html"
 ) {
   const links = [
-    "https://learningbooks.vercel.app/stumble.html",
-    "https://t9os.vercel.app/stumble.html",
-    "https://t9osclass.vercel.app/stumble.html"
+    "https://learnify.vercel.app/r.html",
+    "https://t9oss.vercel.app/r.html"
   ];
 
   const randomLink = links[Math.floor(Math.random() * links.length)];
   window.location.replace(randomLink);
 }
 </script>
-    <script>(function(s){s.dataset.zone='10569238',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
+
+
+<script>
+window.addEventListener('beforeunload', function (e) {
+    e.preventDefault();
+    e.returnValue = '';
+    return '';
+});
+</script>
 
 
 </body>
